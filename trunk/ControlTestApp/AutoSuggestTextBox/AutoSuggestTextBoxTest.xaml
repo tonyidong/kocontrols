@@ -6,6 +6,11 @@
 			 xmlns:koAS="clr-namespace:KO.Controls;assembly=AutoSuggest"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+	<UserControl.Resources>
+		<Style x:Key="hiddenHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+			<Setter Property="Visibility" Value="Collapsed" />
+		</Style>
+	</UserControl.Resources>
     <Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition  Width="80"/>
@@ -23,7 +28,7 @@
 			<koAS:AutoSuggest.SuggestionsListView>
 				<ListView ItemsSource="{Binding ItemsSource}">
 					<ListView.View>
-					<GridView>
+						<GridView ColumnHeaderContainerStyle="{StaticResource hiddenHeaderStyle}">
 						<GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
 						<GridViewColumn Header="Country name" DisplayMemberBinding="{Binding Country.Name}" />
 					</GridView>

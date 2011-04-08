@@ -96,6 +96,16 @@ namespace KO.Controls
 		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
 
+		private ListView CurrentSuggestionsListView
+		{
+			get
+			{
+				if(this.suggestionsControl.itemsSuggestionsListViewContainer.Child != null && this.suggestionsControl.itemsSuggestionsListViewContainer.Child is ListView)
+					return this.suggestionsControl.itemsSuggestionsListViewContainer.Child as ListView;
+				return null;
+			}
+		}
+
 		private bool IsTargetTextBoxEditable { get { return TargetTextBox != null && !TargetTextBox.IsReadOnly; } }
 		private SuggestionsControl suggestionsControl = null;
 
@@ -150,7 +160,8 @@ namespace KO.Controls
 		{
 			if (e.Key == System.Windows.Input.Key.Down && this.IsOpen)
 			{
-				//this.lv.Focus();
+				if (CurrentSuggestionsListView != null)
+					CurrentSuggestionsListView.Focus();
 			}
 		}
 
@@ -163,7 +174,15 @@ namespace KO.Controls
 		{
 			if (IsTargetTextBoxEditable)
 			{
-				//TBD: Open the popup
+				if (!TargetTextBox.IsReadOnly)
+				{
+					//FilterItems();
+
+					if (CurrentSuggestionsListView != null)
+						this.IsOpen = true;
+					else
+						this.IsOpen = false;
+				}
 			}
 		}
 		#endregion 
