@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextBoxAdaptica", "TextBoxAdaptica\TextBoxAdaptica.csproj", "{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlTestApp", "ControlTestApp\ControlTestApp.csproj", "{72CF21E8-354A-48E7-9E57-36902DAA210D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoSuggest", "AutoSuggest\AutoSuggest.csproj", "{6EFEEB53-BBEE-4B2A-A27B-BAF14DC11A0A}"
@@ -19,16 +17,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}.Release|x86.ActiveCfg = Release|Any CPU
 		{72CF21E8-354A-48E7-9E57-36902DAA210D}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{72CF21E8-354A-48E7-9E57-36902DAA210D}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{72CF21E8-354A-48E7-9E57-36902DAA210D}.Debug|Mixed Platforms.Build.0 = Debug|x86

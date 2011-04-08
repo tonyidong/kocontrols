@@ -14,7 +14,40 @@ namespace KO.Controls
 		Space = 1,
 		Tab = 2,
 		Arrows = 4,
-		SpaceTab = Space | Tab
+		SpaceTab = Space | Tab,
+		SpaceArrows = Space | Arrows,
+		TabArrows = Tab | Arrows,
+		SpaceTabArrows = Space | Tab | Arrows
+	}
+
+	[Flags]
+	public enum TaboutTrigger
+	{
+		Space = 1,
+		Tab = 2,
+		Arrows = 4,
+		Enter = 8,
+		Escape = 16,
+		SpaceTab = Space | Tab,
+		SpaceArrows = Space | Arrows,
+		SpaceEnter = Space | Enter,
+		SpaceEscape = Space | Escape,
+		TabArrows = Tab | Arrows,
+		TabEnter = Tab | Enter,
+		TabEscape = Tab | Escape,
+		ArrowsEnter = Arrows | Enter,
+		ArrowsEscape = Arrows | Escape,
+		EnterEscape = Enter | Escape,
+		SpaceTabArrows = SpaceTab | Arrows,
+		SpaceTabEnter = SpaceTab | Enter,
+		SpaceTabEscape = SpaceTab | Escape,
+		TabArrowsEnter = TabArrows | Enter,
+		TabArrowsEscape = TabArrows | Escape,
+		ArrowsEnterEscape = ArrowsEnter | Escape,
+		SpaceTabArrowsEnter = SpaceTab | ArrowsEnter,
+		SpaceTabArrowsEscape = SpaceTab | ArrowsEscape,
+		TabArrowsEnterEscape = TabArrows | EnterEscape,
+		SpaceTabArrowsEnterEscape = SpaceTab | ArrowsEnter | Escape
 	}
 
 	public class AutoSuggest : Popup
@@ -49,18 +82,18 @@ namespace KO.Controls
 		public object SelectedSuggestionPreview { get { return GetValue(SelectedSuggestionPreviewProperty); } set { SetValue(SelectedSuggestionPreviewProperty, value); } }
 		#endregion 
 
-		//Tabout property 
-		
-		//Always exit on escape
-		//Always select on Enter
+		#region Selection Trigger
+		public static DependencyProperty SelectionCommandProperty =
+			DependencyProperty.Register("(SelectionCommand", typeof(SelectionTrigger), typeof(AutoSuggest));
 
-		// TaboutOnSelection SelectionTrigger
-		#region SuggestionsListView
-		//public static DependencyProperty SuggestionsListViewProperty =
-		//    DependencyProperty.Register("SuggestionsListView", typeof(ListView), typeof(AutoSuggest),
-		//    new PropertyMetadata(new PropertyChangedCallback(SuggestionsListView_Changed)));
+		public SelectionTrigger SelectionCommand { get { return (SelectionTrigger)GetValue(SelectionCommandProperty); } set { SetValue(SelectionCommandProperty, value); } }
+		#endregion 
 
-		//public ListView SuggestionsListView { get { return (ListView)GetValue(SuggestionsListViewProperty); } set { SetValue(SuggestionsListViewProperty, value); } }
+		#region Tabout On Selection
+		public static DependencyProperty TaboutCommandProperty =
+			DependencyProperty.Register("TaboutOnSelection", typeof(TaboutTrigger), typeof(AutoSuggest));
+
+		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
 
 		private bool IsTargetTextBoxEditable { get { return TargetTextBox != null && !TargetTextBox.IsReadOnly; } }

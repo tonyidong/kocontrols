@@ -55,7 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AutoSuggestTextBox\AutoSuggestViewModel.cs" />
+    <Compile Include="AutoSuggestTextBox\AutoSuggestConsumerViewModel.cs" />
     <Compile Include="AutoSuggestTextBox\CityEditVM.cs" />
     <Compile Include="AutoSuggestTextBox\CityEditWindow.xaml.cs">
       <DependentUpon>CityEditWindow.xaml</DependentUpon>
@@ -113,9 +113,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TextBoxAdaptica\TextBoxAdaptica.csproj">
-      <Project>{6F8B7BE5-C01F-4ABD-9469-9D395B2E1DCB}</Project>
-      <Name>TextBoxAdaptica</Name>
+    <ProjectReference Include="..\AutoSuggest\AutoSuggest.csproj">
+      <Project>{6EFEEB53-BBEE-4B2A-A27B-BAF14DC11A0A}</Project>
+      <Name>AutoSuggest</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

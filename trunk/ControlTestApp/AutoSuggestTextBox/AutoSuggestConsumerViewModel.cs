@@ -6,24 +6,25 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using ControlTestApp.Model;
 using ControlTestApp.Services;
+using KO.Controls;
 
 namespace ControlTestApp.AutoSuggestTextBox
 {
-	public class AutoSuggestViewModel : DependencyObject
+	public class AutoSuggestConsumerViewModel : DependencyObject
 	{
-		public static readonly DependencyProperty CitiesProperty =
-			 DependencyProperty.Register("Cities", typeof(ObservableCollection<City>),
-			 typeof(AutoSuggestViewModel), new FrameworkPropertyMetadata(new PropertyChangedCallback(Cities_Changed)));
+		//public static readonly DependencyProperty CitiesProperty =
+		//     DependencyProperty.Register("Cities", typeof(ObservableCollection<City>),
+		//     typeof(AutoSuggestConsumerViewModel), new FrameworkPropertyMetadata(new PropertyChangedCallback(Cities_Changed)));
 
-		public ObservableCollection<City> Cities
-		{
-			get{return (ObservableCollection<City>)GetValue(CitiesProperty);}
-			set { SetValue(CitiesProperty, value); }
-		}
+		//public ObservableCollection<City> Cities
+		//{
+		//    get{return (ObservableCollection<City>)GetValue(CitiesProperty);}
+		//    set { SetValue(CitiesProperty, value); }
+		//}
 
 		public static readonly DependencyProperty SelectedCityProperty =
 			 DependencyProperty.Register("SelectedCity", typeof(City),
-			 typeof(AutoSuggestViewModel),new PropertyMetadata());
+			 typeof(AutoSuggestConsumerViewModel),new PropertyMetadata());
 
 		public City SelectedCity
 		{
@@ -33,7 +34,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 		public static readonly DependencyProperty IsAllowInvokeNewProperty =
 		 DependencyProperty.Register("IsAllowInvokeNew", typeof(bool),
-		 typeof(AutoSuggestViewModel), new PropertyMetadata());
+		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
 
 		public bool IsAllowInvokeNew
 		{
@@ -43,7 +44,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 		public static readonly DependencyProperty IsAllowInvokeEditProperty =
 		 DependencyProperty.Register("IsAllowInvokeEdit", typeof(bool),
-		 typeof(AutoSuggestViewModel), new PropertyMetadata());
+		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
 
 		public bool IsAllowInvokeEdit
 		{
@@ -53,7 +54,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 		public static readonly DependencyProperty IsAllowInvalidProperty =
 		 DependencyProperty.Register("IsAllowInvalid", typeof(bool),
-		 typeof(AutoSuggestViewModel), new PropertyMetadata());
+		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
 
 		public bool IsAllowInvalid
 		{
@@ -61,10 +62,14 @@ namespace ControlTestApp.AutoSuggestTextBox
 			set { SetValue(IsAllowInvalidProperty, value); }
 		}
 
-		public AutoSuggestViewModel()
+		public AutoSuggestViewModel<City> AutoSuggestVM { get; private set; }
+
+		public AutoSuggestConsumerViewModel()
 		{
-			Cities = new ObservableCollection<City>(TestDataService.GetCities());
 			SelectedCity = null;
+
+			AutoSuggestVM = new AutoSuggestViewModel<City>();
+			AutoSuggestVM.ItemsSource = TestDataService.GetCities();
 		}
 
 		private static void Cities_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
@@ -84,22 +89,22 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 		public void InvokeNew()
 		{
-			long maxCityId = Cities.Max(x => x.Key);
-			City city = new City() { Key= maxCityId+1, Name="", Country = null};
-			CityEditVM cityEdit = new CityEditVM(city);
-			cityEdit.CitySaved += new EventHandler(cityEdit_CitySaved);
-			CityEditWindow win = new CityEditWindow(cityEdit);
-			win.ShowDialog();
+			//long maxCityId = Cities.Max(x => x.Key);
+			//City city = new City() { Key= maxCityId+1, Name="", Country = null};
+			//CityEditVM cityEdit = new CityEditVM(city);
+			//cityEdit.CitySaved += new EventHandler(cityEdit_CitySaved);
+			//CityEditWindow win = new CityEditWindow(cityEdit);
+			//win.ShowDialog();
 		}
 
 		void cityEdit_CitySaved(object sender, EventArgs e)
 		{
-			CityEditVM vm = (CityEditVM)sender;
-			if (vm.City != null && vm.City.IsValid)
-			{
-				Cities.Add(vm.City);
-			}
-			vm.CitySaved -= new EventHandler(cityEdit_CitySaved);
+			//CityEditVM vm = (CityEditVM)sender;
+			//if (vm.City != null && vm.City.IsValid)
+			//{
+			//    Cities.Add(vm.City);
+			//}
+			//vm.CitySaved -= new EventHandler(cityEdit_CitySaved);
 		}
 	}
 }

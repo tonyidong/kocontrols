@@ -27,8 +27,8 @@ namespace ControlTestApp
 		private void Button_Click(object sender, RoutedEventArgs e)
 		{
 			AutoSuggestTextBox.AutoSuggestTextBoxTest autoSuggestTest = new AutoSuggestTextBox.AutoSuggestTextBoxTest();
-			AutoSuggestTextBox.AutoSuggestViewModel vm = new AutoSuggestTextBox.AutoSuggestViewModel();
-			autoSuggestTest.DataContext = vm;
+			AutoSuggestTextBox.AutoSuggestConsumerViewModel vm = new AutoSuggestTextBox.AutoSuggestConsumerViewModel();
+			autoSuggestTest.DataContext = vm.AutoSuggestVM;
 			ShowControl(autoSuggestTest);
 		}
 

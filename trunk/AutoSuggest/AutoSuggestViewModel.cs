@@ -8,11 +8,11 @@ using System.Collections.ObjectModel;
 
 namespace KO.Controls
 {
-	public class AutoSuggestViewModel:DependencyObject
+	public class AutoSuggestViewModel<T>:DependencyObject
 	{
 		#region IsButtonPanelVisible
 		public static DependencyProperty IsButtonPanelVisibleProperty =
-			DependencyProperty.Register("IsButtonPanelVisible", typeof(bool), typeof(AutoSuggestViewModel),
+			DependencyProperty.Register("IsButtonPanelVisible", typeof(bool), typeof(AutoSuggestViewModel<T>),
 			new PropertyMetadata());
 
 		
@@ -21,8 +21,12 @@ namespace KO.Controls
 
 		public ObservableCollection<CommandViewModel> Commands { get; private set; }
 
-		//Make this dependency property
-		public IList<object> ItemsSource { get; set; }
+		#region Items Source
+		public static DependencyProperty ItemsSourceProperty =
+			DependencyProperty.Register("ItemsSource", typeof(IList<T>), typeof(AutoSuggestViewModel<T>));
+
+		public IList<T> ItemsSource { get { return (IList<T>)GetValue(ItemsSourceProperty); } set { SetValue(ItemsSourceProperty, value); } }
+		#endregion 
 
 		public AutoSuggestViewModel()
 		{
