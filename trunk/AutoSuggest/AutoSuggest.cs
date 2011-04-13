@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Controls.Primitives;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace KO.Controls
 {
@@ -96,6 +97,15 @@ namespace KO.Controls
 		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
 
+		#region Filter Items Command
+		public static DependencyProperty FilterItemsProperty = DependencyProperty.RegisterAttached("FilterItems"
+			, typeof(ICommand)
+			, typeof(AutoSuggest)
+			, null);
+
+		public ICommand FilterItems { get { return (ICommand)GetValue(FilterItemsProperty); } set { SetValue(FilterItemsProperty, value); } }
+		#endregion 
+
 		private ListView CurrentSuggestionsListView
 		{
 			get
@@ -176,7 +186,8 @@ namespace KO.Controls
 			{
 				if (!TargetTextBox.IsReadOnly)
 				{
-					//FilterItems();
+					if (FilterItems != null && TargetTextBox != null)
+						FilterItems.Execute(TargetTextBox.Text);
 
 					if (CurrentSuggestionsListView != null)
 						this.IsOpen = true;

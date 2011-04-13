@@ -117,6 +117,10 @@
       <Project>{6EFEEB53-BBEE-4B2A-A27B-BAF14DC11A0A}</Project>
       <Name>AutoSuggest</Name>
     </ProjectReference>
+    <ProjectReference Include="..\KO.Controls.Common\KO.Controls.Common.csproj">
+      <Project>{0000D187-8B68-468A-BC33-1BCEDEBD1A27}</Project>
+      <Name>KO.Controls.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

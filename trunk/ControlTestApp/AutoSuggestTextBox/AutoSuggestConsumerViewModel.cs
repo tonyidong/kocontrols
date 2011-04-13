@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using ControlTestApp.Model;
 using ControlTestApp.Services;
 using KO.Controls;
+using KO.Controls.Common.Command;
 
 namespace ControlTestApp.AutoSuggestTextBox
 {
@@ -62,14 +63,16 @@ namespace ControlTestApp.AutoSuggestTextBox
 			set { SetValue(IsAllowInvalidProperty, value); }
 		}
 
+		private IList<City> AllCities { get; set; }
 		public AutoSuggestViewModel<City> AutoSuggestVM { get; private set; }
 
 		public AutoSuggestConsumerViewModel()
 		{
 			SelectedCity = null;
-
+			
 			AutoSuggestVM = new AutoSuggestViewModel<City>();
-			AutoSuggestVM.ItemsSource = TestDataService.GetCities();
+			AllCities = TestDataService.GetCities();
+			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString())).ToList<City>(); });
 		}
 
 		private static void Cities_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
