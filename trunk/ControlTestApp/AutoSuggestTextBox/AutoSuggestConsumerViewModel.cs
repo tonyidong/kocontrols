@@ -48,22 +48,11 @@ namespace ControlTestApp.AutoSuggestTextBox
 		public AutoSuggestViewModel AutoSuggestVM { get; private set; }
 
 		public AutoSuggestConsumerViewModel()
-		{			
-			AutoSuggestVM = new AutoSuggestViewModel(new GetSelectedSuggestionFormattedName(GetSelectedCityFormattedName));
-
+		{
 			AllCities = TestDataService.GetCities();
-			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString())).ToList<City>(); });
-		}
 
-		private static void Cities_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
-		{
-
-		}
-
-		public string GetSelectedCityFormattedName(object selectedSuggestion)
-		{
-			City city = (City)selectedSuggestion;
-			return city.Name;
+			AutoSuggestVM = new AutoSuggestViewModel((x) => { if (x == null)return ""; else return ((City)x).Name; });
+			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString(), StringComparison.CurrentCultureIgnoreCase)).ToList<City>(); });
 		}
 
 		public void InvokeEdit()

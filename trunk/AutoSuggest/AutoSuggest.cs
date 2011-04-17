@@ -213,6 +213,8 @@ namespace KO.Controls
 						{
 							CurrentSuggestionsListView.SelectedIndex = 0;
 							DataContext.SelectedSuggestionPreview = CurrentSuggestionsListView.Items[0];
+							string n = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestionPreview);
+							
 						}
 						else
 						{
