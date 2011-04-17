@@ -31,16 +31,28 @@ namespace KO.Controls
 		
 		#region SelectedSuggestionPreview
 		public static DependencyProperty SelectedSuggestionPreviewProperty =
-			DependencyProperty.Register("SelectedSuggestionPreview", typeof(object), typeof(AutoSuggest));
+			DependencyProperty.Register("SelectedSuggestionPreview", typeof(object), typeof(AutoSuggest)
+			,new PropertyMetadata(new PropertyChangedCallback((x, y) =>
+			{
+				AutoSuggestViewModel vm1 = (AutoSuggestViewModel)x;
+				if (!vm1.DoNotChangeText)
+					vm1.TextBoxText = vm1.GetSelectedSuggestionFormattedName(y.NewValue);
+			})));
 
 		public object SelectedSuggestionPreview { get { return GetValue(SelectedSuggestionPreviewProperty); } set { SetValue(SelectedSuggestionPreviewProperty, value); } }
 		#endregion 
 
 		#region SelectedSuggestion
 		public static DependencyProperty SelectedSuggestionProperty =
-			DependencyProperty.Register("SelectedSuggestion", typeof(object), typeof(AutoSuggestViewModel));
+			DependencyProperty.Register("SelectedSuggestion", typeof(object), typeof(AutoSuggestViewModel)
+			,new PropertyMetadata(new PropertyChangedCallback((x, y) =>
+			{
+				AutoSuggestViewModel vm1 = (AutoSuggestViewModel)x;
+				if (!vm1.DoNotChangeText)
+					vm1.TextBoxText = vm1.GetSelectedSuggestionFormattedName(y.NewValue);
+			})));
 
-		public object SelectedSuggestion { get { return GetValue(SelectedSuggestionProperty); } set { SetValue(SelectedSuggestionProperty, value); if (GetSelectedSuggestionFormattedName != null) SelectedSuggestionName = GetSelectedSuggestionFormattedName(value); } }
+		public object SelectedSuggestion { get { return GetValue(SelectedSuggestionProperty); } set { SetValue(SelectedSuggestionProperty, value); } }
 		#endregion 
 
 		#region Filter Items Command
@@ -51,16 +63,20 @@ namespace KO.Controls
 		#endregion 
 
 		#region Selected Suggestion Name
-		public static readonly DependencyProperty SelectedSuggestionNameProperty =
-			 DependencyProperty.Register("SelectedSuggestionName", typeof(string),
+		public static readonly DependencyProperty TextBoxTextProperty =
+			 DependencyProperty.Register("TextBoxText", typeof(string),
 			 typeof(AutoSuggestViewModel), null);
 
-		public string SelectedSuggestionName
+		public string TextBoxText
 		{
-			get { return (string)GetValue(SelectedSuggestionNameProperty); }
-			set { SetValue(SelectedSuggestionNameProperty, value); }
+			get { return (string)GetValue(TextBoxTextProperty); }
+			set { SetValue(TextBoxTextProperty, value); }
 		}
 		#endregion
+
+		public bool DoNotChangeText { get; private set; }
+
+		public bool IsAllowInvalidText { get; set; }
 
 		public ObservableCollection<CommandViewModel> Commands { get; private set; }
 		public GetSelectedSuggestionFormattedName GetSelectedSuggestionFormattedName { get; set; }
@@ -84,6 +100,13 @@ namespace KO.Controls
 		protected virtual void DoFilterItems(string x)
 		{
 
+		}
+
+		internal void SetSuggestionToNullButLeaveTextUnchanged()
+		{
+			DoNotChangeText = true;
+			SelectedSuggestion = null;
+			DoNotChangeText = false;
 		}
 	}
 }

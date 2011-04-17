@@ -97,6 +97,8 @@ namespace KO.Controls
 		#endregion 
 
 		#region Properties
+		private int selectionLength = 0;
+
 		private ListView CurrentSuggestionsListView
 		{
 			get
@@ -128,19 +130,83 @@ namespace KO.Controls
 			if (args.OldValue != null)
 			{
 				TextBox oldTextBox = (TextBox)args.OldValue;
-				oldTextBox.PreviewKeyDown -= new System.Windows.Input.KeyEventHandler(autoSuggest.TargetTextBox_PreviewKeyDown);
-				oldTextBox.KeyUp -= new System.Windows.Input.KeyEventHandler(autoSuggest.TargetTextBox_KeyUp);
-				oldTextBox.LostKeyboardFocus -= new System.Windows.Input.KeyboardFocusChangedEventHandler(autoSuggest.TargetTextBox_LostKeyboardFocus);
+				oldTextBox.PreviewKeyDown -= autoSuggest.TargetTextBox_PreviewKeyDown;
+				oldTextBox.TextChanged -=autoSuggest.TargetTextBox_TextChanged;
+				oldTextBox.LostKeyboardFocus -= autoSuggest.TargetTextBox_LostKeyboardFocus;
 			}
 
 			if (args.NewValue != null)
 			{
 				TextBox newTextBox = (TextBox)args.NewValue;
 				autoSuggest.PlacementTarget = newTextBox;
-				newTextBox.PreviewKeyDown += new System.Windows.Input.KeyEventHandler(autoSuggest.TargetTextBox_PreviewKeyDown);
-				newTextBox.KeyUp += new System.Windows.Input.KeyEventHandler(autoSuggest.TargetTextBox_KeyUp);
-				newTextBox.LostKeyboardFocus += new System.Windows.Input.KeyboardFocusChangedEventHandler(autoSuggest.TargetTextBox_LostKeyboardFocus);
+				newTextBox.PreviewKeyDown += autoSuggest.TargetTextBox_PreviewKeyDown;
+				newTextBox.TextChanged += autoSuggest.TargetTextBox_TextChanged;
+				newTextBox.LostKeyboardFocus += autoSuggest.TargetTextBox_LostKeyboardFocus;
 			}
+		}
+
+		private void TargetTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			if (selectingItemOrClosingPopup) { selectingItemOrClosingPopup = false; return; }
+			
+			if (IsTargetTextBoxEditable)
+			{
+				if (!TargetTextBox.IsReadOnly)
+				{
+					if (DataContext.FilterItems != null && TargetTextBox != null)
+						DataContext.FilterItems.Execute(TargetTextBox.Text);
+
+					if (CurrentSuggestionsListView != null && CurrentSuggestionsListView.Items.Count > 0)
+						this.IsOpen = true;
+					else
+						this.IsOpen = false;
+
+					if (CurrentSuggestionsListView != null)
+					{
+						if (CurrentSuggestionsListView.Items.Count > 0)
+						{
+							CurrentSuggestionsListView.SelectedIndex = 0;
+							DataContext.SelectedSuggestionPreview = CurrentSuggestionsListView.Items[0];
+
+							selectingItemOrClosingPopup = true;
+							if (e.Changes != null && e.Changes.Count > 0)
+							{
+								TextChange txtChange = e.Changes.First<TextChange>();
+
+								int indx = TargetTextBox.CaretIndex;
+								if (txtChange.AddedLength > 0 || txtChange.Offset > 0)
+								{
+									string n = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestionPreview);
+									TargetTextBox.Text = n;
+								}
+								//If no added text and text changed this must be the backspace key
+								if (txtChange.AddedLength == 0 && selectionLength > 0 && txtChange.RemovedLength == selectionLength)
+									indx--;
+
+								if (indx == 0)
+									TargetTextBox.Text = "";
+
+								TargetTextBox.CaretIndex = indx;
+								if (TargetTextBox.Text.Length > indx)
+								{
+									selectionLength = TargetTextBox.Text.Length - indx;
+									TargetTextBox.Select(indx, selectionLength);
+								}
+								else
+								{
+									selectionLength = 0;
+								}
+							}
+							selectingItemOrClosingPopup = false;
+						}
+						else
+						{
+							DataContext.SelectedSuggestionPreview = null;
+						}
+					}
+				}
+				e.Handled = true;
+			}	
 		}
 
 		private static void SuggestionsListView_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
@@ -151,6 +217,7 @@ namespace KO.Controls
 				ListView oldListView = (ListView)args.NewValue;
 
 				oldListView.PreviewKeyDown -= autoSuggest.newListView_PreviewKeyDown;
+				oldListView.LostKeyboardFocus -= autoSuggest.newListView_LostKeyboardFocus; 
 			}
 
 			if (args.NewValue != null)
@@ -159,7 +226,13 @@ namespace KO.Controls
 				autoSuggest.suggestionsControl.itemsSuggestionsListViewContainer.Child = newListView;
 
 				newListView.PreviewKeyDown += autoSuggest.newListView_PreviewKeyDown;
+				newListView.LostKeyboardFocus += autoSuggest.newListView_LostKeyboardFocus;
 			}
+		}
+
+		private void newListView_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
+			HandleLostFocus();
 		}
 
 		private void newListView_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -185,48 +258,78 @@ namespace KO.Controls
 
 		private void TargetTextBox_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
 		{
-			if (CurrentSuggestionsListView != null && !CurrentSuggestionsListView.IsKeyboardFocused)
-			{
-				this.IsOpen = false;
-			}
-		}
-
-		private void TargetTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-		{
-			if (selectingItemOrClosingPopup) { selectingItemOrClosingPopup = false; return; }
-
-			if (IsTargetTextBoxEditable)
-			{
-				if (!TargetTextBox.IsReadOnly)
-				{
-					if (DataContext.FilterItems != null && TargetTextBox != null)
-						DataContext.FilterItems.Execute(TargetTextBox.Text);
-
-					if (CurrentSuggestionsListView != null)
-						this.IsOpen = true;
-					else
-						this.IsOpen = false;
-
-					if (CurrentSuggestionsListView != null)
-					{
-						if (CurrentSuggestionsListView.Items.Count > 0)
-						{
-							CurrentSuggestionsListView.SelectedIndex = 0;
-							DataContext.SelectedSuggestionPreview = CurrentSuggestionsListView.Items[0];
-							string n = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestionPreview);
-							
-						}
-						else
-						{
-							DataContext.SelectedSuggestionPreview = null;
-						}
-					}	
-				}
-			}
+			HandleLostFocus();	
 		}
 		#endregion 
 
 		#region Private Methods
+		private void HandleLostFocus()
+		{
+			if ((!this.IsFocused && !this.IsKeyboardFocused)
+				&& (TargetTextBox != null && !TargetTextBox.IsKeyboardFocused)
+				&& (CurrentSuggestionsListView != null && !CurrentSuggestionsListView.IsKeyboardFocused))
+			{
+				if (CurrentSuggestionsListView.SelectedIndex >= 0)
+				{
+					var item = CurrentSuggestionsListView.ItemContainerGenerator.ContainerFromIndex(CurrentSuggestionsListView.SelectedIndex)
+						 as ListViewItem;
+					if (item != null && (item.IsFocused || item.IsKeyboardFocused))
+						return;
+				}
+
+				this.IsOpen = false;
+
+				if (String.IsNullOrEmpty(TargetTextBox.Text))
+				{
+					DataContext.SelectedSuggestion = null;
+				}
+				else
+				{
+					if (DataContext.IsAllowInvalidText)
+					{
+						if (DataContext.SelectedSuggestionPreview == null)
+						{
+							if (DataContext.SelectedSuggestion != null)
+							{
+								if (TargetTextBox.Text != DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestion))
+									DataContext.SetSuggestionToNullButLeaveTextUnchanged();
+							}
+						}
+						else
+						{
+							if (TargetTextBox.Text != DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestionPreview))
+							{
+								DataContext.SetSuggestionToNullButLeaveTextUnchanged();
+							}
+							else
+							{
+								selectingItemOrClosingPopup = true;
+								if (DataContext.SelectedSuggestion != null)
+								{
+									TargetTextBox.Text = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestion);
+								}
+								else
+								{
+									TargetTextBox.Text = "";
+								}
+								selectingItemOrClosingPopup = false;
+							}
+						}
+					}
+					else
+					{
+						selectingItemOrClosingPopup = true;
+						if (DataContext.SelectedSuggestion == null)
+							TargetTextBox.Text = "";
+						else
+							TargetTextBox.Text = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestion);
+						selectingItemOrClosingPopup = false;
+					}
+				}
+				DataContext.SelectedSuggestionPreview = null;
+			}
+		}
+
 		private bool SelectItemAndTaboutByKeyDownValue(Key keyDown)
 		{
 			bool handled = false;
@@ -297,8 +400,9 @@ namespace KO.Controls
 			DataContext.SelectedSuggestion = CurrentSuggestionsListView.SelectedItem;
 			selectingItemOrClosingPopup = true;
 			this.IsOpen = false;
-		
+			TargetTextBox.Text = DataContext.TextBoxText;
 			TargetTextBox.CaretIndex = TargetTextBox.Text.Length;
+			selectingItemOrClosingPopup = false;
 		}
 
 		private void TabOutNext()
@@ -306,6 +410,7 @@ namespace KO.Controls
 			TargetTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
 			selectingItemOrClosingPopup = true;
 			this.IsOpen = false;
+			selectingItemOrClosingPopup = false;
 		}
 
 		private void TabOutPrevious()

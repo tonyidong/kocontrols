@@ -34,15 +34,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 			set { SetValue(IsAllowInvokeEditProperty, value); }
 		}
 
-		public static readonly DependencyProperty IsAllowInvalidProperty =
-		 DependencyProperty.Register("IsAllowInvalid", typeof(bool),
-		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
-
-		public bool IsAllowInvalid
-		{
-			get { return (bool)GetValue(IsAllowInvalidProperty); }
-			set { SetValue(IsAllowInvalidProperty, value); }
-		}
+		
 
 		private IList<City> AllCities { get; set; }
 		public AutoSuggestViewModel AutoSuggestVM { get; private set; }
@@ -53,6 +45,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 			AutoSuggestVM = new AutoSuggestViewModel((x) => { if (x == null)return ""; else return ((City)x).Name; });
 			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString(), StringComparison.CurrentCultureIgnoreCase)).ToList<City>(); });
+			AutoSuggestVM.IsAllowInvalidText = true;
 		}
 
 		public void InvokeEdit()
