@@ -28,7 +28,7 @@ namespace ControlTestApp
 		{
 			AutoSuggestTextBox.AutoSuggestTextBoxTest autoSuggestTest = new AutoSuggestTextBox.AutoSuggestTextBoxTest();
 			AutoSuggestTextBox.AutoSuggestConsumerViewModel vm = new AutoSuggestTextBox.AutoSuggestConsumerViewModel();
-			autoSuggestTest.DataContext = vm.AutoSuggestVM;
+			autoSuggestTest.DataContext = vm;
 			ShowControl(autoSuggestTest);
 		}
 

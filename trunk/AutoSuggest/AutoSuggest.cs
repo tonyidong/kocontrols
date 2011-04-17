@@ -53,6 +53,19 @@ namespace KO.Controls
 
 	public class AutoSuggest : Popup
 	{
+		#region Overriding DataContext
+		static AutoSuggest()
+		{
+			DataContextProperty.OverrideMetadata(typeof(AutoSuggest), new FrameworkPropertyMetadata
+			(
+				null,
+				null,
+				(d, v) => { if(v != null && !(v is AutoSuggestViewModel)) throw new NotSupportedException(); return v; }
+			));
+		}
+		public new AutoSuggestViewModel DataContext { get { return (AutoSuggestViewModel)base.DataContext; } set { base.DataContext = value;  } }
+		#endregion 
+
 		#region TargetTextBox
 		public static DependencyProperty TargetTextBoxProperty =
 			DependencyProperty.Register("TargetTextBox",typeof(TextBox),typeof(AutoSuggest),
@@ -69,20 +82,6 @@ namespace KO.Controls
 		public ListView SuggestionsListView { get { return (ListView)GetValue(SuggestionsListViewProperty); } set { SetValue(SuggestionsListViewProperty, value); } }
 		#endregion 
 
-		#region SelectedSuggestion
-		public static DependencyProperty SelectedSuggestionProperty =
-			DependencyProperty.Register("SelectedSuggestion", typeof(object), typeof(AutoSuggest));
-
-		public object SelectedSuggestion { get { return GetValue(SelectedSuggestionProperty); } set { SetValue(SelectedSuggestionProperty, value); } }
-		#endregion 
-
-		#region SelectedSuggestionPreview
-		public static DependencyProperty SelectedSuggestionPreviewProperty =
-			DependencyProperty.Register("SelectedSuggestionPreview", typeof(object), typeof(AutoSuggest));
-
-		public object SelectedSuggestionPreview { get { return GetValue(SelectedSuggestionPreviewProperty); } set { SetValue(SelectedSuggestionPreviewProperty, value); } }
-		#endregion 
-
 		#region Selection Trigger
 		public static DependencyProperty SelectionCommandProperty =
 			DependencyProperty.Register("(SelectionCommand", typeof(SelectionTrigger), typeof(AutoSuggest));
@@ -97,15 +96,7 @@ namespace KO.Controls
 		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
 
-		#region Filter Items Command
-		public static DependencyProperty FilterItemsProperty = DependencyProperty.RegisterAttached("FilterItems"
-			, typeof(ICommand)
-			, typeof(AutoSuggest)
-			, null);
-
-		public ICommand FilterItems { get { return (ICommand)GetValue(FilterItemsProperty); } set { SetValue(FilterItemsProperty, value); } }
-		#endregion 
-
+		#region Properties
 		private ListView CurrentSuggestionsListView
 		{
 			get
@@ -119,14 +110,16 @@ namespace KO.Controls
 		private bool IsTargetTextBoxEditable { get { return TargetTextBox != null && !TargetTextBox.IsReadOnly; } }
 		private SuggestionsControl suggestionsControl = null;
 
+		private bool selectingItemOrClosingPopup = false;
+		#endregion 
+
+		#region Constructors
 		public AutoSuggest()
 		{
 			suggestionsControl = new SuggestionsControl();
 			this.Child = suggestionsControl;
-
-			//TBD: Create the bindings for suggestionsControl assuming DataContext of tpe AutoSuggestViewModel.
-			//
 		}
+		#endregion 
 
 		#region Event Handlers
 		private static void TargetTextBox_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
@@ -156,14 +149,24 @@ namespace KO.Controls
 			if (args.OldValue != null)
 			{
 				ListView oldListView = (ListView)args.NewValue;
-				//Remove events
+
+				oldListView.PreviewKeyDown -= autoSuggest.newListView_PreviewKeyDown;
 			}
 
 			if (args.NewValue != null)
 			{
 				ListView newListView = (ListView)args.NewValue;
 				autoSuggest.suggestionsControl.itemsSuggestionsListViewContainer.Child = newListView;
+
+				newListView.PreviewKeyDown += autoSuggest.newListView_PreviewKeyDown;
 			}
+		}
+
+		private void newListView_PreviewKeyDown(object sender, KeyEventArgs e)
+		{
+			ListView lv = (ListView)sender;
+			if (lv.SelectedItem != null)
+				e.Handled =	SelectItemAndTaboutByKeyDownValue(e.Key);
 		}
 
 		private void TargetTextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -173,28 +176,141 @@ namespace KO.Controls
 				if (CurrentSuggestionsListView != null)
 					CurrentSuggestionsListView.Focus();
 			}
+			if (e.Key == Key.Space && (SelectionCommand & SelectionTrigger.Space) == SelectionTrigger.Space
+				&& (CurrentSuggestionsListView == null || CurrentSuggestionsListView.Items.Count != 1))
+				return;
+
+			e.Handled = SelectItemAndTaboutByKeyDownValue(e.Key);
 		}
 
 		private void TargetTextBox_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
 		{
-			
+			if (CurrentSuggestionsListView != null && !CurrentSuggestionsListView.IsKeyboardFocused)
+			{
+				this.IsOpen = false;
+			}
 		}
 
 		private void TargetTextBox_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
 		{
+			if (selectingItemOrClosingPopup) { selectingItemOrClosingPopup = false; return; }
+
 			if (IsTargetTextBoxEditable)
 			{
 				if (!TargetTextBox.IsReadOnly)
 				{
-					if (FilterItems != null && TargetTextBox != null)
-						FilterItems.Execute(TargetTextBox.Text);
+					if (DataContext.FilterItems != null && TargetTextBox != null)
+						DataContext.FilterItems.Execute(TargetTextBox.Text);
 
 					if (CurrentSuggestionsListView != null)
 						this.IsOpen = true;
 					else
 						this.IsOpen = false;
+
+					if (CurrentSuggestionsListView != null)
+					{
+						if (CurrentSuggestionsListView.Items.Count > 0)
+						{
+							CurrentSuggestionsListView.SelectedIndex = 0;
+							DataContext.SelectedSuggestionPreview = CurrentSuggestionsListView.Items[0];
+						}
+						else
+						{
+							DataContext.SelectedSuggestionPreview = null;
+						}
+					}	
 				}
 			}
+		}
+		#endregion 
+
+		#region Private Methods
+		private bool SelectItemAndTaboutByKeyDownValue(Key keyDown)
+		{
+			bool handled = false;
+			//Determine whether to select and close the autosuggest
+			if (keyDown == Key.Enter)
+			{
+				SelectItemAndClose();
+				if ((TaboutCommand & TaboutTrigger.Enter) == TaboutTrigger.Enter)
+					TabOutNext();
+				handled = true;
+			}
+			else if (keyDown == Key.Escape)
+			{
+				this.IsOpen = false;
+				selectingItemOrClosingPopup = true;
+			}
+			else if (keyDown == Key.Right && keyDown == Key.Left)
+			{
+				if ((SelectionCommand & SelectionTrigger.Arrows) == SelectionTrigger.Arrows)
+				{
+					SelectItemAndClose();
+					handled = true;
+				}
+
+				if ((TaboutCommand & TaboutTrigger.Arrows) == TaboutTrigger.Arrows)
+				{
+					if (keyDown == Key.Right)
+						TabOutNext();
+					else
+						TabOutPrevious();
+					handled = true;
+				}
+			}
+			else if (keyDown == Key.Space)
+			{
+				if ((SelectionCommand & SelectionTrigger.Space) == SelectionTrigger.Space)
+				{
+					SelectItemAndClose();
+					handled = true;
+				}
+
+				if ((TaboutCommand & TaboutTrigger.Space) == TaboutTrigger.Space)
+				{
+					TabOutNext();
+					handled = true;
+				}
+			}
+			else if (keyDown == Key.Tab)
+			{
+				if ((SelectionCommand & SelectionTrigger.Tab) == SelectionTrigger.Tab)
+				{
+					SelectItemAndClose();
+					handled = true;
+				}
+
+				if ((TaboutCommand & TaboutTrigger.Tab) == TaboutTrigger.Tab)
+				{
+					TabOutNext();
+					handled = true;
+				}
+			}
+
+			return handled;
+		}
+
+		private void SelectItemAndClose()
+		{
+			DataContext.SelectedSuggestion = CurrentSuggestionsListView.SelectedItem;
+			selectingItemOrClosingPopup = true;
+			this.IsOpen = false;
+		
+			TargetTextBox.CaretIndex = TargetTextBox.Text.Length;
+		}
+
+		private void TabOutNext()
+		{
+			TargetTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+			selectingItemOrClosingPopup = true;
+			this.IsOpen = false;
+		}
+
+		private void TabOutPrevious()
+		{
+			TargetTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
+			selectingItemOrClosingPopup = true;
+			this.IsOpen = false;
 		}
 		#endregion 
 	}

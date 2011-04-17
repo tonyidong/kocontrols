@@ -8,31 +8,12 @@ using ControlTestApp.Model;
 using ControlTestApp.Services;
 using KO.Controls;
 using KO.Controls.Common.Command;
+using System.Windows.Data;
 
 namespace ControlTestApp.AutoSuggestTextBox
 {
 	public class AutoSuggestConsumerViewModel : DependencyObject
 	{
-		//public static readonly DependencyProperty CitiesProperty =
-		//     DependencyProperty.Register("Cities", typeof(ObservableCollection<City>),
-		//     typeof(AutoSuggestConsumerViewModel), new FrameworkPropertyMetadata(new PropertyChangedCallback(Cities_Changed)));
-
-		//public ObservableCollection<City> Cities
-		//{
-		//    get{return (ObservableCollection<City>)GetValue(CitiesProperty);}
-		//    set { SetValue(CitiesProperty, value); }
-		//}
-
-		public static readonly DependencyProperty SelectedCityProperty =
-			 DependencyProperty.Register("SelectedCity", typeof(City),
-			 typeof(AutoSuggestConsumerViewModel),new PropertyMetadata());
-
-		public City SelectedCity
-		{
-			get { return (City)GetValue(SelectedCityProperty); }
-			set { SetValue(SelectedCityProperty, value); }
-		}
-
 		public static readonly DependencyProperty IsAllowInvokeNewProperty =
 		 DependencyProperty.Register("IsAllowInvokeNew", typeof(bool),
 		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
@@ -64,13 +45,12 @@ namespace ControlTestApp.AutoSuggestTextBox
 		}
 
 		private IList<City> AllCities { get; set; }
-		public AutoSuggestViewModel<City> AutoSuggestVM { get; private set; }
+		public AutoSuggestViewModel AutoSuggestVM { get; private set; }
 
 		public AutoSuggestConsumerViewModel()
-		{
-			SelectedCity = null;
-			
-			AutoSuggestVM = new AutoSuggestViewModel<City>();
+		{			
+			AutoSuggestVM = new AutoSuggestViewModel(new GetSelectedSuggestionFormattedName(GetSelectedCityFormattedName));
+
 			AllCities = TestDataService.GetCities();
 			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString())).ToList<City>(); });
 		}
@@ -80,11 +60,18 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 		}
 
+		public string GetSelectedCityFormattedName(object selectedSuggestion)
+		{
+			City city = (City)selectedSuggestion;
+			return city.Name;
+		}
+
 		public void InvokeEdit()
 		{
-			if (SelectedCity != null)
+			if (AutoSuggestVM != null && AutoSuggestVM.SelectedSuggestion != null)
 			{
-				CityEditVM cityEdit = new CityEditVM(SelectedCity);
+				City city = (City)AutoSuggestVM.SelectedSuggestion;
+				CityEditVM cityEdit = new CityEditVM(city);
 				CityEditWindow win = new CityEditWindow(cityEdit);
 				win.ShowDialog();
 			}
