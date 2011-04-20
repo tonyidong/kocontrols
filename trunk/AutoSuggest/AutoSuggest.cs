@@ -58,12 +58,12 @@ namespace KO.Controls
 		{
 			DataContextProperty.OverrideMetadata(typeof(AutoSuggest), new FrameworkPropertyMetadata
 			(
-				null,
-				null,
-				(d, v) => { if(v != null && !(v is AutoSuggestViewModel)) throw new NotSupportedException(); return v; }
+                null,
+                new PropertyChangedCallback((d, v) => { if (v != null && v.NewValue != null && v.NewValue is AutoSuggestViewModel) { InitializeText(d as AutoSuggest, v.NewValue as AutoSuggestViewModel); } }),
+			    new CoerceValueCallback((d, v) => { if(v != null && !(v is AutoSuggestViewModel)) throw new NotSupportedException(); return v; })
 			));
 		}
-		public AutoSuggestViewModel DataContextAutoSuggestVM { get { return (AutoSuggestViewModel)base.DataContext; } set { base.DataContext = value;  } }
+		public AutoSuggestViewModel DataContextAutoSuggestVM { get { return (AutoSuggestViewModel)base.DataContext; }}
 		#endregion 
 
 		#region TargetTextBox
@@ -131,6 +131,22 @@ namespace KO.Controls
 		#endregion 
 
 		#region Event Handlers
+        private static void InitializeText(AutoSuggest autoSuggest, AutoSuggestViewModel autoSuggestVM)
+        {
+            if (autoSuggest != null && autoSuggestVM != null && autoSuggest.TargetTextBox != null)
+            {
+                if (autoSuggestVM.SelectedSuggestion != null)
+                {
+                    string n = autoSuggestVM.GetSelectedSuggestionFormattedName(autoSuggestVM.SelectedSuggestion);
+                    autoSuggest.TargetTextBox.Text = n;
+                }
+                else
+                {
+                    autoSuggest.TargetTextBox.Text = "";
+                }
+            }
+        }
+
 		private static void TargetTextBox_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
 			AutoSuggest autoSuggest = (AutoSuggest)sender;
@@ -149,6 +165,8 @@ namespace KO.Controls
 				newTextBox.PreviewKeyDown += autoSuggest.TargetTextBox_PreviewKeyDown;
 				newTextBox.TextChanged += autoSuggest.TargetTextBox_TextChanged;
 				newTextBox.LostKeyboardFocus += autoSuggest.TargetTextBox_LostKeyboardFocus;
+
+                InitializeText(autoSuggest, autoSuggest.DataContextAutoSuggestVM);
 			}
 		}
 

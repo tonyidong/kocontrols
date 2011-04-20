@@ -34,7 +34,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 			set { SetValue(IsAllowInvokeEditProperty, value); }
 		}
 
-		
+	
 
 		private IList<City> AllCities { get; set; }
 		public AutoSuggestViewModel AutoSuggestVM { get; private set; }
@@ -48,6 +48,8 @@ namespace ControlTestApp.AutoSuggestTextBox
 			AutoSuggestVM.IsAllowInvalidText = true;
             CommandViewModel cvm = new CommandViewModel("Edit",new RelayCommand((x) => {MessageBox.Show("test");}));
             AutoSuggestVM.Commands.Add(cvm);
+
+            AutoSuggestVM.SelectedSuggestion = AllCities[1];
 		}
 
 		public void InvokeEdit()
