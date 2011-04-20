@@ -63,7 +63,7 @@ namespace KO.Controls
 				(d, v) => { if(v != null && !(v is AutoSuggestViewModel)) throw new NotSupportedException(); return v; }
 			));
 		}
-		public new AutoSuggestViewModel DataContext { get { return (AutoSuggestViewModel)base.DataContext; } set { base.DataContext = value;  } }
+		public AutoSuggestViewModel DataContextAutoSuggestVM { get { return (AutoSuggestViewModel)base.DataContext; } set { base.DataContext = value;  } }
 		#endregion 
 
 		#region TargetTextBox
@@ -91,7 +91,7 @@ namespace KO.Controls
 
 		#region Tabout On Selection
 		public static DependencyProperty TaboutCommandProperty =
-			DependencyProperty.Register("TaboutOnSelection", typeof(TaboutTrigger), typeof(AutoSuggest));
+			DependencyProperty.Register("TaboutOnSelection", typeof(TaboutTrigger), typeof(AutoSuggest),new PropertyMetadata(TaboutTrigger.Enter));
 
 		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
@@ -120,7 +120,14 @@ namespace KO.Controls
 		{
 			suggestionsControl = new SuggestionsControl();
 			this.Child = suggestionsControl;
+            this.PreviewMouseDown += AutoSuggest_PreviewMouseDown;
 		}
+
+        void AutoSuggest_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            this.Focus();
+           // e.Handled = true;
+        }
 		#endregion 
 
 		#region Event Handlers
@@ -153,8 +160,8 @@ namespace KO.Controls
 			{
 				if (!TargetTextBox.IsReadOnly)
 				{
-					if (DataContext.FilterItems != null && TargetTextBox != null)
-						DataContext.FilterItems.Execute(TargetTextBox.Text);
+					if (DataContextAutoSuggestVM.FilterItems != null && TargetTextBox != null)
+						DataContextAutoSuggestVM.FilterItems.Execute(TargetTextBox.Text);
 
 					if (CurrentSuggestionsListView != null && CurrentSuggestionsListView.Items.Count > 0)
 						this.IsOpen = true;
@@ -166,7 +173,7 @@ namespace KO.Controls
 						if (CurrentSuggestionsListView.Items.Count > 0)
 						{
 							CurrentSuggestionsListView.SelectedIndex = 0;
-							DataContext.SelectedSuggestionPreview = CurrentSuggestionsListView.Items[0];
+							DataContextAutoSuggestVM.SelectedSuggestionPreview = CurrentSuggestionsListView.Items[0];
 
 							selectingItemOrClosingPopup = true;
 							if (e.Changes != null && e.Changes.Count > 0)
@@ -176,7 +183,7 @@ namespace KO.Controls
 								int indx = TargetTextBox.CaretIndex;
 								if (txtChange.AddedLength > 0 || txtChange.Offset > 0)
 								{
-									string n = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestionPreview);
+									string n = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestionPreview);
 									TargetTextBox.Text = n;
 								}
 								//If no added text and text changed this must be the backspace key
@@ -201,7 +208,7 @@ namespace KO.Controls
 						}
 						else
 						{
-							DataContext.SelectedSuggestionPreview = null;
+							DataContextAutoSuggestVM.SelectedSuggestionPreview = null;
 						}
 					}
 				}
@@ -281,32 +288,32 @@ namespace KO.Controls
 
 				if (String.IsNullOrEmpty(TargetTextBox.Text))
 				{
-					DataContext.SelectedSuggestion = null;
+					DataContextAutoSuggestVM.SelectedSuggestion = null;
 				}
 				else
 				{
-					if (DataContext.IsAllowInvalidText)
+					if (DataContextAutoSuggestVM.IsAllowInvalidText)
 					{
-						if (DataContext.SelectedSuggestionPreview == null)
+						if (DataContextAutoSuggestVM.SelectedSuggestionPreview == null)
 						{
-							if (DataContext.SelectedSuggestion != null)
+							if (DataContextAutoSuggestVM.SelectedSuggestion != null)
 							{
-								if (TargetTextBox.Text != DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestion))
-									DataContext.SetSuggestionToNullButLeaveTextUnchanged();
+								if (TargetTextBox.Text != DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestion))
+									DataContextAutoSuggestVM.SetSuggestionToNullButLeaveTextUnchanged();
 							}
 						}
 						else
 						{
-							if (TargetTextBox.Text != DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestionPreview))
+							if (TargetTextBox.Text != DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestionPreview))
 							{
-								DataContext.SetSuggestionToNullButLeaveTextUnchanged();
+								DataContextAutoSuggestVM.SetSuggestionToNullButLeaveTextUnchanged();
 							}
 							else
 							{
 								selectingItemOrClosingPopup = true;
-								if (DataContext.SelectedSuggestion != null)
+								if (DataContextAutoSuggestVM.SelectedSuggestion != null)
 								{
-									TargetTextBox.Text = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestion);
+									TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestion);
 								}
 								else
 								{
@@ -319,14 +326,14 @@ namespace KO.Controls
 					else
 					{
 						selectingItemOrClosingPopup = true;
-						if (DataContext.SelectedSuggestion == null)
+						if (DataContextAutoSuggestVM.SelectedSuggestion == null)
 							TargetTextBox.Text = "";
 						else
-							TargetTextBox.Text = DataContext.GetSelectedSuggestionFormattedName(DataContext.SelectedSuggestion);
+							TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestion);
 						selectingItemOrClosingPopup = false;
 					}
 				}
-				DataContext.SelectedSuggestionPreview = null;
+				DataContextAutoSuggestVM.SelectedSuggestionPreview = null;
 			}
 		}
 
@@ -397,10 +404,10 @@ namespace KO.Controls
 
 		private void SelectItemAndClose()
 		{
-			DataContext.SelectedSuggestion = CurrentSuggestionsListView.SelectedItem;
+			DataContextAutoSuggestVM.SelectedSuggestion = CurrentSuggestionsListView.SelectedItem;
 			selectingItemOrClosingPopup = true;
 			this.IsOpen = false;
-			TargetTextBox.Text = DataContext.TextBoxText;
+			TargetTextBox.Text = DataContextAutoSuggestVM.TextBoxText;
 			TargetTextBox.CaretIndex = TargetTextBox.Text.Length;
 			selectingItemOrClosingPopup = false;
 		}

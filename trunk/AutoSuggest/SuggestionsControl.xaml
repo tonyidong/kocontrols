@@ -11,7 +11,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary>
 					<DataTemplate x:Key="CommandsTemplate">
-						<ItemsControl IsTabStop="False" ItemsSource="{Binding}" Margin="6,2">
+						<ItemsControl IsTabStop="False" ItemsSource="{Binding}" Margin="6,2" Background="White">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
 									<Button Command="{Binding Path=Command}">
@@ -21,7 +21,7 @@
 							</ItemsControl.ItemTemplate>
 							<ItemsControl.ItemsPanel>
 								<ItemsPanelTemplate>
-									<StackPanel Name="buttonMenuPanel" Orientation="Horizontal" Height="30" VerticalAlignment="Top">
+									<StackPanel Name="buttonMenuPanel" Orientation="Horizontal" Height="30" VerticalAlignment="Top" Background="White">
 									</StackPanel>
 								</ItemsPanelTemplate>
 							</ItemsControl.ItemsPanel>
@@ -31,14 +31,34 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
-	
-	<DockPanel LastChildFill="True">
+
+    <!--<StackPanel >
+        <ContentControl Content="{Binding Path=Commands}"
+                        ContentTemplate="{StaticResource CommandsTemplate}" 
+                       
+						Height="30"
+                        Visibility="{Binding Path=IsButtonPanelVisible, Mode=OneWay,Converter={x:Static cs:BooleanToVisibilityConverter.Instance}}" />
+        <Border Name="itemsSuggestionsListViewContainer">
+            <ListView >
+                <GridView>
+
+                </GridView>
+            </ListView>
+        </Border>
+    </StackPanel>-->
+    
+    <DockPanel LastChildFill="True" SnapsToDevicePixels="True">
 		<ContentControl Content="{Binding Path=Commands}"
                         ContentTemplate="{StaticResource CommandsTemplate}" 
                         DockPanel.Dock="Bottom"
-						Height="20"
+						Height="30"
                         Visibility="{Binding Path=IsButtonPanelVisible, Mode=OneWay,Converter={x:Static cs:BooleanToVisibilityConverter.Instance}}" />
-		<Border Name="itemsSuggestionsListViewContainer">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <Button Content="Test" />
+            <Button Content="Test2" />  
+        </StackPanel>
+        
+        <Border Name="itemsSuggestionsListViewContainer">
 			<ListView DockPanel.Dock="Top">
 				<GridView>
 

@@ -46,6 +46,8 @@ namespace ControlTestApp.AutoSuggestTextBox
 			AutoSuggestVM = new AutoSuggestViewModel((x) => { if (x == null)return ""; else return ((City)x).Name; });
 			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString(), StringComparison.CurrentCultureIgnoreCase)).ToList<City>(); });
 			AutoSuggestVM.IsAllowInvalidText = true;
+            CommandViewModel cvm = new CommandViewModel("Edit",new RelayCommand((x) => {MessageBox.Show("test");}));
+            AutoSuggestVM.Commands.Add(cvm);
 		}
 
 		public void InvokeEdit()
