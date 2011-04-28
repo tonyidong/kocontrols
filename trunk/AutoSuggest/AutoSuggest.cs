@@ -97,6 +97,9 @@ namespace KO.Controls
 		#endregion 
 
 		#region Properties
+        private Window Window = null;
+        private bool cancelWindowKeyDown = false;
+
 		private int selectionLength = 0;
 
 		private ListView CurrentSuggestionsListView
@@ -121,6 +124,9 @@ namespace KO.Controls
 			suggestionsControl = new SuggestionsControl();
 			this.Child = suggestionsControl;
             this.PreviewMouseDown += AutoSuggest_PreviewMouseDown;
+            
+            AllowsTransparency = true;
+            PopupAnimation = System.Windows.Controls.Primitives.PopupAnimation.Fade;
 		}
 
         void AutoSuggest_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -131,6 +137,36 @@ namespace KO.Controls
 		#endregion 
 
 		#region Event Handlers
+     
+        protected override void OnOpened(EventArgs e)
+        {
+            base.OnOpened(e);
+
+            Window = Window.GetWindow(this);
+            Window.PreviewMouseDown += (x, y) => {  };
+            Window.PreviewKeyDown += Window_PreviewKeyDown;
+        }
+
+        void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            Window.Activate();
+           
+            if (e.Handled) return;
+
+            Dispatcher.BeginInvoke((Action)delegate
+            {
+                if (!cancelWindowKeyDown)
+                {
+                    if (e.Key == Key.Escape)
+                    {
+                        IsOpen = false;
+                        e.Handled = true;
+                    }
+                }
+                cancelWindowKeyDown = true;
+            });
+        }
+
         private static void InitializeText(AutoSuggest autoSuggest, AutoSuggestViewModel autoSuggestVM)
         {
             if (autoSuggest != null && autoSuggestVM != null && autoSuggest.TargetTextBox != null)
@@ -242,7 +278,7 @@ namespace KO.Controls
 				ListView oldListView = (ListView)args.NewValue;
 
 				oldListView.PreviewKeyDown -= autoSuggest.newListView_PreviewKeyDown;
-				oldListView.LostKeyboardFocus -= autoSuggest.newListView_LostKeyboardFocus; 
+				oldListView.LostKeyboardFocus -= autoSuggest.newListView_LostKeyboardFocus;
 			}
 
 			if (args.NewValue != null)
@@ -254,6 +290,12 @@ namespace KO.Controls
 				newListView.LostKeyboardFocus += autoSuggest.newListView_LostKeyboardFocus;
 			}
 		}
+
+        private void Window_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+             if (CurrentSuggestionsListView != null && CurrentSuggestionsListView.SelectedIndex > 0)
+                SelectItemAndClose();
+        }
 
 		private void newListView_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
@@ -370,6 +412,7 @@ namespace KO.Controls
 			{
 				this.IsOpen = false;
 				selectingItemOrClosingPopup = true;
+                cancelWindowKeyDown = true;
 			}
 			else if (keyDown == Key.Right && keyDown == Key.Left)
 			{
@@ -419,6 +462,17 @@ namespace KO.Controls
 
 			return handled;
 		}
+
+        private void FocusSelectedListViewElement()
+        {
+            if (CurrentSuggestionsListView.SelectedIndex >= 0)
+            {
+                var item = CurrentSuggestionsListView.ItemContainerGenerator.ContainerFromIndex(CurrentSuggestionsListView.SelectedIndex)
+                     as ListViewItem;
+                if (item != null)
+                    item.Focus();
+            }
+        }
 
 		private void SelectItemAndClose()
 		{
