@@ -20,15 +20,14 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>
 			<RowDefinition Height="30"/>
+			<RowDefinition Height="30"/>
 		</Grid.RowDefinitions>
 		
 		<Label Grid.Column="0" Grid.Row="0" Content="City:" />
 		<TextBox Grid.Column="1" Grid.Row="0" Width="140" Height="22" 
 				 Name="cityTextBox"/>
-		<koAS:AutoSuggest  DataContext="{Binding AutoSuggestVM}"
-						   TargetTextBox="{Binding ElementName=cityTextBox}" 
-						   TaboutCommand="Enter" 
-						   SelectionCommand="SpaceTabArrows">
+		<koAS:AutoSuggest Name="autoSuggest"  DataContext="{Binding AutoSuggestVM}"
+						   TargetTextBox="{Binding ElementName=cityTextBox}">
 			<koAS:AutoSuggest.SuggestionsListView>
 				<ListView ItemsSource="{Binding ItemsSource}">
 					<ListView.View>
@@ -48,5 +47,7 @@
 			<CheckBox Content="Allow invoke edit window" IsChecked="{Binding IsAllowInvokeEdit}"/>
 			<CheckBox Content="Allo invoke new window" IsChecked="{Binding IsAllowInvokeNew}"/>
 		</StackPanel>
+		
+		<Button Grid.Column="0" Grid.Row="2" Click="Button_Click">Test</Button>
 	</Grid>
 </UserControl>

@@ -6,6 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.ComponentModel;
 
 namespace KO.Controls
 {
@@ -92,7 +93,6 @@ namespace KO.Controls
 		#region Tabout On Selection
 		public static DependencyProperty TaboutCommandProperty =
 			DependencyProperty.Register("TaboutOnSelection", typeof(TaboutTrigger), typeof(AutoSuggest),new PropertyMetadata(TaboutTrigger.Enter));
-
 		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
 
@@ -169,19 +169,42 @@ namespace KO.Controls
 
         private static void InitializeText(AutoSuggest autoSuggest, AutoSuggestViewModel autoSuggestVM)
         {
-            if (autoSuggest != null && autoSuggestVM != null && autoSuggest.TargetTextBox != null)
-            {
-                if (autoSuggestVM.SelectedSuggestion != null)
-                {
-                    string n = autoSuggestVM.GetSelectedSuggestionFormattedName(autoSuggestVM.SelectedSuggestion);
-                    autoSuggest.TargetTextBox.Text = n;
-                }
-                else
-                {
-                    autoSuggest.TargetTextBox.Text = "";
-                }
-            }
+			if (autoSuggest != null)
+			{
+				autoSuggest.SetSuggestedText();
+
+				if (autoSuggestVM != null)
+				{
+					DependencyPropertyDescriptor itemSelectedPreviewDescr = DependencyPropertyDescriptor.FromProperty(AutoSuggestViewModel.SelectedSuggestionProperty, typeof(AutoSuggestViewModel));
+					if (itemSelectedPreviewDescr != null)
+					{
+						itemSelectedPreviewDescr.AddValueChanged(autoSuggestVM, delegate
+						{
+							autoSuggest.SetSuggestedText();
+						});
+					}
+				}
+			}
         }
+
+		private void SetSuggestedText()
+		{
+			TargetTextBox.TextChanged -= TargetTextBox_TextChanged;
+
+			if (DataContextAutoSuggestVM != null && TargetTextBox != null)
+			{
+				if (DataContextAutoSuggestVM.SelectedSuggestion != null)
+				{
+					string n = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestion);
+					TargetTextBox.Text = n;
+				}
+				else
+				{
+					TargetTextBox.Text = "";
+				}
+			}
+			TargetTextBox.TextChanged += TargetTextBox_TextChanged;
+		}
 
 		private static void TargetTextBox_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
@@ -208,7 +231,7 @@ namespace KO.Controls
 
 		private void TargetTextBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (selectingItemOrClosingPopup) { selectingItemOrClosingPopup = false; return; }
+			if (selectingItemOrClosingPopup) { return; }
 			
 			if (IsTargetTextBoxEditable)
 			{
@@ -476,10 +499,10 @@ namespace KO.Controls
 
 		private void SelectItemAndClose()
 		{
-			DataContextAutoSuggestVM.SelectedSuggestion = CurrentSuggestionsListView.SelectedItem;
 			selectingItemOrClosingPopup = true;
+			DataContextAutoSuggestVM.SelectedSuggestion = CurrentSuggestionsListView.SelectedItem;
 			this.IsOpen = false;
-			TargetTextBox.Text = DataContextAutoSuggestVM.TextBoxText;
+			//TargetTextBox.Text = DataContextAutoSuggestVM.TextBoxText;
 			TargetTextBox.CaretIndex = TargetTextBox.Text.Length;
 			selectingItemOrClosingPopup = false;
 		}

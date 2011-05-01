@@ -36,7 +36,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 	
 
-		private IList<City> AllCities { get; set; }
+		public IList<City> AllCities { get; set; }
 		public AutoSuggestViewModel AutoSuggestVM { get; private set; }
 
 		public AutoSuggestConsumerViewModel()
