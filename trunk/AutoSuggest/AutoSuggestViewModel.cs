@@ -75,18 +75,12 @@ namespace KO.Controls
 		#endregion
 
 		public bool DoNotChangeText { get; private set; }
-
 		public bool IsAllowInvalidText { get; set; }
 
 		public ObservableCollection<CommandViewModel> Commands { get; private set; }
 		public GetSelectedSuggestionFormattedName GetSelectedSuggestionFormattedName { get; set; }
 
-		public AutoSuggestViewModel(GetSelectedSuggestionFormattedName getSelectedSuggestionFormattedName)
-			: this()
-		{
-			this.GetSelectedSuggestionFormattedName = getSelectedSuggestionFormattedName;
-		}
-
+		#region Constructors
 		public AutoSuggestViewModel()
 		{
 			Commands = new ObservableCollection<CommandViewModel>();
@@ -96,6 +90,13 @@ namespace KO.Controls
 			};
 			IsButtonPanelVisible = false;
 		}
+
+		public AutoSuggestViewModel(GetSelectedSuggestionFormattedName getSelectedSuggestionFormattedName)
+			: this()
+		{
+			this.GetSelectedSuggestionFormattedName = getSelectedSuggestionFormattedName;
+		}
+		#endregion 
 
 		protected virtual void DoFilterItems(string x)
 		{
