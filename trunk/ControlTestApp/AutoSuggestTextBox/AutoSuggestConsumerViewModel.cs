@@ -34,8 +34,6 @@ namespace ControlTestApp.AutoSuggestTextBox
 			set { SetValue(IsAllowInvokeEditProperty, value); }
 		}
 
-	
-
 		public IList<City> AllCities { get; set; }
 		public AutoSuggestViewModel AutoSuggestVM { get; private set; }
 

@@ -29,7 +29,7 @@
 		<koAS:AutoSuggest Name="autoSuggest"  DataContext="{Binding AutoSuggestVM}"
 						   TargetTextBox="{Binding ElementName=cityTextBox}" 
 						  TaboutCommand="ArrowsEnterEscape" 
-						  SelectionCommand="Fake">
+						  SelectionCommand="SpaceTabArrows">
 			<koAS:AutoSuggest.SuggestionsListView>
 				<ListView ItemsSource="{Binding ItemsSource}">
 					<ListView.View>
