@@ -23,8 +23,8 @@ namespace ControlTestApp.AutoSuggestTextBox
 		{
 			InitializeComponent();
 
-			autoSuggest.TaboutCommand = KO.Controls.TaboutTrigger.Enter;
-			autoSuggest.SelectionCommand = KO.Controls.SelectionTrigger.SpaceTabArrows;
+			//autoSuggest.TaboutCommand = KO.Controls.TaboutTrigger.Enter;
+			//autoSuggest.SelectionCommand = KO.Controls.SelectionTrigger.SpaceTabArrows;
 		}
 
 		private void CheckBox_Checked(object sender, RoutedEventArgs e)

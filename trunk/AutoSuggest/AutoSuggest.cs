@@ -13,6 +13,7 @@ namespace KO.Controls
 	[Flags]
 	public enum SelectionTrigger
 	{
+		Fake=0,
 		Space = 1,
 		Tab = 2,
 		Arrows = 4,
@@ -52,6 +53,12 @@ namespace KO.Controls
 		SpaceTabArrowsEnterEscape = SpaceTab | ArrowsEnter | Escape
 	}
 
+	//Fix double click
+	//On focus popup suggestions
+	//When the usere uses the arrow keys keep the focus on the textbox
+	//	Hook to textboxes up and down keys and select next or previous item in the ListView.
+	//	Check whether the listview does not have commands for selecting next and previous element and use it instead
+	//When the user deletes delete the charachters do not select them
 	public class AutoSuggest : Popup
 	{
 		#region Overriding DataContext
@@ -85,14 +92,13 @@ namespace KO.Controls
 
 		#region Selection Trigger
 		public static DependencyProperty SelectionCommandProperty =
-			DependencyProperty.Register("(SelectionCommand", typeof(SelectionTrigger), typeof(AutoSuggest));
-
+			DependencyProperty.Register("SelectionCommand", typeof(SelectionTrigger), typeof(AutoSuggest), new PropertyMetadata(SelectionTrigger.SpaceTabArrows));
 		public SelectionTrigger SelectionCommand { get { return (SelectionTrigger)GetValue(SelectionCommandProperty); } set { SetValue(SelectionCommandProperty, value); } }
 		#endregion 
 
 		#region Tabout On Selection
 		public static DependencyProperty TaboutCommandProperty =
-			DependencyProperty.Register("TaboutOnSelection", typeof(TaboutTrigger), typeof(AutoSuggest),new PropertyMetadata(TaboutTrigger.Enter));
+			DependencyProperty.Register("TaboutCommand", typeof(TaboutTrigger), typeof(AutoSuggest), new PropertyMetadata(TaboutTrigger.Enter));
 		public TaboutTrigger TaboutCommand { get { return (TaboutTrigger)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
 		#endregion 
 
@@ -302,6 +308,8 @@ namespace KO.Controls
 
 				oldListView.PreviewKeyDown -= autoSuggest.newListView_PreviewKeyDown;
 				oldListView.LostKeyboardFocus -= autoSuggest.newListView_LostKeyboardFocus;
+				//TBD: Fix the remove handler
+				//	oldListView.RemoveHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)delegate(object a, RoutedEventArgs b) { });
 			}
 
 			if (args.NewValue != null)
@@ -311,6 +319,12 @@ namespace KO.Controls
 
 				newListView.PreviewKeyDown += autoSuggest.newListView_PreviewKeyDown;
 				newListView.LostKeyboardFocus += autoSuggest.newListView_LostKeyboardFocus;
+
+				newListView.AddHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)delegate(object a, RoutedEventArgs b)
+				{
+					//TBD: select item and close popup
+				}, true);
+
 			}
 		}
 

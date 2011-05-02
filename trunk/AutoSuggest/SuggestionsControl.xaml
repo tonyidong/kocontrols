@@ -11,7 +11,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary>
 					<DataTemplate x:Key="CommandsTemplate">
-						<ItemsControl IsTabStop="False" ItemsSource="{Binding}" Margin="6,2" Background="White">
+						<ItemsControl IsTabStop="False" ItemsSource="{Binding}" Margin="6,2">
 							<ItemsControl.ItemTemplate>
 								<DataTemplate>
 									<Button Command="{Binding Path=Command}" Height="25">
@@ -21,7 +21,7 @@
 							</ItemsControl.ItemTemplate>
 							<ItemsControl.ItemsPanel>
 								<ItemsPanelTemplate>
-									<StackPanel Name="buttonMenuPanel" Orientation="Horizontal" Height="32" VerticalAlignment="Top" Background="White">
+									<StackPanel Name="buttonMenuPanel" Orientation="Horizontal" Height="32" VerticalAlignment="Top">
 									</StackPanel>
 								</ItemsPanelTemplate>
 							</ItemsControl.ItemsPanel>
@@ -32,11 +32,10 @@
 		</ResourceDictionary>
 	</UserControl.Resources>
     
-    <DockPanel LastChildFill="True" SnapsToDevicePixels="True">
-		<ContentControl Content="{Binding Path=Commands}"
+    <DockPanel LastChildFill="True" SnapsToDevicePixels="True" Background="LightGray">
+		<ContentControl DockPanel.Dock="Bottom" Height="32" 
+						Content="{Binding Path=Commands}"
                         ContentTemplate="{StaticResource CommandsTemplate}" 
-                        DockPanel.Dock="Bottom"
-						Height="32"
                         Visibility="{Binding Path=IsButtonPanelVisible, Mode=OneWay,Converter={x:Static cs:BooleanToVisibilityConverter.Instance}}" />
 
         <Border Name="itemsSuggestionsListViewContainer">
