@@ -74,11 +74,13 @@ namespace KO.Controls
 		}
 		#endregion
 
+		#region Properties
 		public bool DoNotChangeText { get; private set; }
 		public bool IsAllowInvalidText { get; set; }
 
 		public ObservableCollection<CommandViewModel> Commands { get; private set; }
 		public GetSelectedSuggestionFormattedName GetSelectedSuggestionFormattedName { get; set; }
+		#endregion 
 
 		#region Constructors
 		public AutoSuggestViewModel()

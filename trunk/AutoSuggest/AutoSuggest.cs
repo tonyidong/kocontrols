@@ -284,7 +284,7 @@ namespace KO.Controls
 			//        TargetTextBox.Select(TargetTextBox.CaretIndex-1,TargetTextBox.SelectedText.Length+1);
 			//    }
 			//}
-			else
+			else if(this.IsOpen)
 			{
 				if (e.Key == Key.Space && (SelectionCommand & SelectionTrigger.Space) == SelectionTrigger.Space
 					&& (currentSuggestionsListView == null || currentSuggestionsListView.Items.Count != 1))
