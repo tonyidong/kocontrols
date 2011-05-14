@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ControlTestApp.AutoSuggestTextBox;
 
 namespace ControlTestApp
 {
@@ -22,20 +23,11 @@ namespace ControlTestApp
 		public MainWindow()
 		{
 			InitializeComponent();
-		}
 
-		private void Button_Click(object sender, RoutedEventArgs e)
-		{
-			AutoSuggestTextBox.AutoSuggestTextBoxTest autoSuggestTest = new AutoSuggestTextBox.AutoSuggestTextBoxTest();
-			AutoSuggestTextBox.AutoSuggestConsumerViewModel vm = new AutoSuggestTextBox.AutoSuggestConsumerViewModel();
-			autoSuggestTest.DataContext = vm;
-			ShowControl(autoSuggestTest);
-		}
-
-		private void ShowControl(Control ctrl)
-		{
-			contentPlaceholderPanel.Children.Clear();
-			contentPlaceholderPanel.Children.Add(ctrl);
+			var vm = new TestAppViewModel();
+			vm.AutoSuggestConsumerViewModel = new AutoSuggestConsumerViewModel();
+			
+			DataContext = vm;
 		}
 	}
 }

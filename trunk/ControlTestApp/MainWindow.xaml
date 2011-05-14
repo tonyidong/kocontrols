@@ -1,17 +1,13 @@
 ﻿<Window x:Class="ControlTestApp.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="50"/>
-			<RowDefinition Height="Auto"/>
-		</Grid.RowDefinitions>
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:test="clr-namespace:ControlTestApp.AutoSuggestTextBox"
 		
-		<StackPanel Orientation="Horizontal" Grid.Row="0">
-			<Button Content="AutoSuggest TextBox" Click="Button_Click" Height="30"/>
-		</StackPanel>
-		<DockPanel Name="contentPlaceholderPanel" Grid.Row="1" LastChildFill="True"/>
-		
-	</Grid>
+		Title="MainWindow" Height="350" Width="525">
+	
+	<TabControl>
+		<TabItem Header="Auto Suggest">
+			<test:AutoSuggestTextBoxTest DataContext="{Binding AutoSuggestConsumerViewModel}"></test:AutoSuggestTextBoxTest>
+		</TabItem>
+	</TabControl>
 </Window>

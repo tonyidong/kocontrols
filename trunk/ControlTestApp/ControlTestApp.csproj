@@ -64,6 +64,7 @@
     <Compile Include="Model\City.cs" />
     <Compile Include="Model\Country.cs" />
     <Compile Include="Services\TestDataService.cs" />
+    <Compile Include="TestAppViewModel.cs" />
     <Page Include="AutoSuggestTextBox\AutoSuggestTextBoxTest.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
