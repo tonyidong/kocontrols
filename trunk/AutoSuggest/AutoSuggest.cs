@@ -54,12 +54,9 @@ namespace KO.Controls
 	}
 	#endregion 
 
-	//Fix: ListView item double click does not work properly.
-	//		It seems that we are not getting the event
 	//  Copy/Paste does not work.
 	public class AutoSuggest : Popup
 	{
-	
 		#region Overriding DataContext
 		static AutoSuggest()
 		{
@@ -109,6 +106,7 @@ namespace KO.Controls
 		private SuggestionsControl suggestionsControl = null;
 		private bool cancelWindowKeyDown = false;
 		private bool selectingItemOrClosingPopup = false;
+        private Window window;
 
 		private ListView currentSuggestionsListView
 		{
@@ -147,24 +145,40 @@ namespace KO.Controls
 
 		protected override void OnClosed(EventArgs e)
 		{
-			base.OnOpened(e);
+            if (window != null)
+			{
+				window.PreviewKeyDown -= Window_PreviewKeyDown;
+				window.Deactivated -= window_Deactivated;
+			}
 
-			Window window = Window.GetWindow(this);
-			window.PreviewKeyDown -= Window_PreviewKeyDown;
-		}
+            base.OnClosed(e);
+        }
 
 		protected override void OnOpened(EventArgs e)
 		{
 			base.OnOpened(e);
 
-			Window window = Window.GetWindow(this);
-			window.PreviewKeyDown += Window_PreviewKeyDown;
+            //Fixed bug from Microsoft (Window.GetWindow can return null) :-)
+            if (window != null)
+			{
+				window.PreviewKeyDown -= Window_PreviewKeyDown;
+				window.Deactivated -= window_Deactivated;
+			}
+            window = Window.GetWindow(this);
+			if (window != null)
+			{
+				window.PreviewKeyDown += Window_PreviewKeyDown;
+				window.Deactivated += window_Deactivated;
+			}
+		}
+		private void window_Deactivated(object sender, EventArgs e)
+		{
+			IsOpen = false;
 		}
 
 		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			Window window = (Window)sender;
-			window.Activate();
+			if(window != null) window.Activate();
 
 			if (e.Handled) return;
 
@@ -217,7 +231,7 @@ namespace KO.Controls
 
 		private void TargetTextBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (selectingItemOrClosingPopup) { return; }
+			if (selectingItemOrClosingPopup || (DataContextAutoSuggestVM != null && DataContextAutoSuggestVM.CodeInput)) { return; }
 			
 			if (isTargetTextBoxEditable)
 			{
@@ -416,17 +430,16 @@ namespace KO.Controls
 			}
 		}
 
-		//Check this method
 		private void HandleLostFocus()
 		{
-			if ((!this.IsFocused && !this.IsKeyboardFocused && !this.IsKeyboardFocusWithin)
+			if ((!this.IsKeyboardFocused && !this.IsKeyboardFocusWithin)
 				&& (TargetTextBox != null && !TargetTextBox.IsKeyboardFocused)
 				&& (currentSuggestionsListView != null && !currentSuggestionsListView.IsKeyboardFocused))
 			{
 				if (currentSuggestionsListView.SelectedIndex >= 0)
 				{
 					ListViewItem item = currentSuggestionsListView.ItemContainerGenerator.ContainerFromIndex(currentSuggestionsListView.SelectedIndex) as ListViewItem;
-					if (item != null && (item.IsFocused || item.IsKeyboardFocused || item.IsKeyboardFocusWithin))
+					if (item != null && (item.IsKeyboardFocused || item.IsKeyboardFocusWithin))
 						return;
 				}
 
@@ -438,7 +451,7 @@ namespace KO.Controls
 				}
 				else
 				{
-					if (DataContextAutoSuggestVM.IsAllowInvalidText)
+					if (DataContextAutoSuggestVM.IsInvalidTextAllowed)
 					{
 						if (DataContextAutoSuggestVM.SelectedSuggestionPreview == null)
 						{

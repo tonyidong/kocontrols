@@ -14,6 +14,14 @@ namespace KO.Controls
 
 	public class AutoSuggestViewModel:DependencyObject
 	{
+		#region Properties
+		public bool CodeInput { get; private set; }
+		public bool DoNotChangeText { get; private set; }
+
+		public ObservableCollection<CommandViewModel> Commands { get; private set; }
+		public GetSelectedSuggestionFormattedName GetSelectedSuggestionFormattedName { get; set; }
+		#endregion 
+
 		#region IsButtonPanelVisible
 		public static DependencyProperty IsButtonPanelVisibleProperty =
 			DependencyProperty.Register("IsButtonPanelVisible", typeof(bool), typeof(AutoSuggestViewModel),
@@ -21,6 +29,14 @@ namespace KO.Controls
 
 		public bool IsButtonPanelVisible { get { return (bool)GetValue(IsButtonPanelVisibleProperty); } set { SetValue(IsButtonPanelVisibleProperty, value); } }
 		#endregion 
+
+		#region IsButtonPanelVisible
+		public static DependencyProperty IsInvalidTextAllowedProperty =
+			DependencyProperty.Register("IsInvalidTextAllowed", typeof(bool), typeof(AutoSuggestViewModel),
+			new PropertyMetadata());
+
+		public bool IsInvalidTextAllowed { get { return (bool)GetValue(IsInvalidTextAllowedProperty); } set { SetValue(IsInvalidTextAllowedProperty, value); } }
+		#endregion
 
 		#region Items Source
 		public static DependencyProperty ItemsSourceProperty =
@@ -49,7 +65,11 @@ namespace KO.Controls
 			{
 				AutoSuggestViewModel vm1 = (AutoSuggestViewModel)x;
 				if (!vm1.DoNotChangeText)
+				{
+					vm1.CodeInput = true;
 					vm1.TextBoxText = vm1.GetSelectedSuggestionFormattedName(y.NewValue);
+					vm1.CodeInput = false;
+				}
 			})));
 
 		public object SelectedSuggestion { get { return GetValue(SelectedSuggestionProperty); } set { SetValue(SelectedSuggestionProperty, value); } }
@@ -74,17 +94,10 @@ namespace KO.Controls
 		}
 		#endregion
 
-		#region Properties
-		public bool DoNotChangeText { get; private set; }
-		public bool IsAllowInvalidText { get; set; }
-
-		public ObservableCollection<CommandViewModel> Commands { get; private set; }
-		public GetSelectedSuggestionFormattedName GetSelectedSuggestionFormattedName { get; set; }
-		#endregion 
-
 		#region Constructors
 		public AutoSuggestViewModel()
 		{
+			CodeInput = false;
 			Commands = new ObservableCollection<CommandViewModel>();
 			Commands.CollectionChanged += (s, a) =>
 			{
