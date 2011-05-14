@@ -59,6 +59,7 @@ namespace KO.Controls
 	//  Copy/Paste does not work.
 	public class AutoSuggest : Popup
 	{
+	
 		#region Overriding DataContext
 		static AutoSuggest()
 		{
@@ -126,6 +127,7 @@ namespace KO.Controls
 		#region Constructors
 		public AutoSuggest()
 		{
+			
 			suggestionsControl = new SuggestionsControl();
 
 			this.Child = suggestionsControl;
@@ -417,14 +419,14 @@ namespace KO.Controls
 		//Check this method
 		private void HandleLostFocus()
 		{
-			if ((!this.IsFocused && !this.IsKeyboardFocused)
+			if ((!this.IsFocused && !this.IsKeyboardFocused && !this.IsKeyboardFocusWithin)
 				&& (TargetTextBox != null && !TargetTextBox.IsKeyboardFocused)
 				&& (currentSuggestionsListView != null && !currentSuggestionsListView.IsKeyboardFocused))
 			{
 				if (currentSuggestionsListView.SelectedIndex >= 0)
 				{
 					ListViewItem item = currentSuggestionsListView.ItemContainerGenerator.ContainerFromIndex(currentSuggestionsListView.SelectedIndex) as ListViewItem;
-					if (item != null && (item.IsFocused || item.IsKeyboardFocused))
+					if (item != null && (item.IsFocused || item.IsKeyboardFocused || item.IsKeyboardFocusWithin))
 						return;
 				}
 
