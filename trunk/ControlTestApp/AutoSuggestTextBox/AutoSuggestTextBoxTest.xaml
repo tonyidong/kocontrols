@@ -13,18 +13,13 @@
 	</UserControl.Resources>
     <Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition  Width="80"/>
+			<ColumnDefinition  Width="100"/>
 			<ColumnDefinition Width="150"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="30"/>
-			<RowDefinition Height="30"/>
-			<RowDefinition Height="30"/>
-		</Grid.RowDefinitions>
 		
-		<Label Grid.Column="0" Grid.Row="0" Content="City:" />
-		<TextBox Grid.Column="1" Grid.Row="0" Width="140" Height="22" 
+		<Label Grid.Column="0" Content="City:" HorizontalAlignment="Right" />
+		<TextBox Grid.Column="1" Width="140" Height="22" Padding="0, 3, 0, 0" VerticalAlignment="Top"
 				 Name="cityTextBox"/>
 		<koAS:AutoSuggest Name="autoSuggest"  DataContext="{Binding AutoSuggestVM}"
 						   TargetTextBox="{Binding ElementName=cityTextBox}" 
@@ -44,12 +39,15 @@
 			</adapticaTextBox:AutoSuggest.SuggestionsListView>-->
 		</koAS:AutoSuggest>
 		
-		<StackPanel Grid.Column="2" Grid.Row="0" Grid.RowSpan="2">
-			<CheckBox Content="Allow invalid values" IsChecked="{Binding IsAllowInvalid}"/>
-			<CheckBox Content="Allow invoke edit window" IsChecked="{Binding IsAllowInvokeEdit}"/>
-			<CheckBox Content="Allo invoke new window" IsChecked="{Binding IsAllowInvokeNew}"/>
+		<StackPanel Grid.Column="2" Grid.RowSpan="2">
+			<CheckBox Margin="5"
+				Content="Allow invalid values" IsChecked="{Binding AutoSuggestVM.IsInvalidTextAllowed}"/>
+			<CheckBox Margin="5"
+				Content="Allow invoke edit window" IsChecked="{Binding IsInvokeEditAllowed}"/>
+			<CheckBox Margin="5"
+				Content="Allow invoke new window" IsChecked="{Binding IsInvokeNewAllowed}"/>
+			<Button Margin="5" Width="150" HorizontalAlignment="Left"
+				Click="Button_Click">Select Kotel City</Button>
 		</StackPanel>
-		
-		<Button Grid.Column="0" Grid.Row="2" Click="Button_Click">Test</Button>
 	</Grid>
 </UserControl>

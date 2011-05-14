@@ -9,29 +9,30 @@ using ControlTestApp.Services;
 using KO.Controls;
 using KO.Controls.Common.Command;
 using System.Windows.Data;
+using System.Windows.Threading;
 
 namespace ControlTestApp.AutoSuggestTextBox
 {
 	public class AutoSuggestConsumerViewModel : DependencyObject
 	{
-		public static readonly DependencyProperty IsAllowInvokeNewProperty =
-		 DependencyProperty.Register("IsAllowInvokeNew", typeof(bool),
+		public static readonly DependencyProperty IsInvokeNewAllowedProperty =
+		 DependencyProperty.Register("IsInvokeNewAllowed", typeof(bool),
 		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
 
-		public bool IsAllowInvokeNew
+		public bool IsInvokeNewAllowed
 		{
-			get { return (bool)GetValue(IsAllowInvokeNewProperty); }
-			set { SetValue(IsAllowInvokeNewProperty, value); }
+			get { return (bool)GetValue(IsInvokeNewAllowedProperty); }
+			set { SetValue(IsInvokeNewAllowedProperty, value); }
 		}
 
-		public static readonly DependencyProperty IsAllowInvokeEditProperty =
-		 DependencyProperty.Register("IsAllowInvokeEdit", typeof(bool),
+		public static readonly DependencyProperty IsInvokeEditAllowedProperty =
+		 DependencyProperty.Register("IsInvokeEditAllowed", typeof(bool),
 		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
 
-		public bool IsAllowInvokeEdit
+		public bool IsInvokeEditAllowed
 		{
-			get { return (bool)GetValue(IsAllowInvokeEditProperty); }
-			set { SetValue(IsAllowInvokeEditProperty, value); }
+			get { return (bool)GetValue(IsInvokeEditAllowedProperty); }
+			set { SetValue(IsInvokeEditAllowedProperty, value); }
 		}
 
 		public IList<City> AllCities { get; set; }
@@ -43,12 +44,15 @@ namespace ControlTestApp.AutoSuggestTextBox
 
 			AutoSuggestVM = new AutoSuggestViewModel((x) => { if (x == null)return ""; else return ((City)x).Name; });
 			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString(), StringComparison.CurrentCultureIgnoreCase)).ToList<City>(); });
-			AutoSuggestVM.IsAllowInvalidText = true;
-            CommandViewModel cvm = new CommandViewModel("Edit",new RelayCommand((x) => {MessageBox.Show("test");}));
-            AutoSuggestVM.Commands.Add(cvm);
+			AutoSuggestVM.IsInvalidTextAllowed = true;
+			
+			editCommand = new CommandViewModel("Edit", new RelayCommand((x) => { InvokeEdit(); }));
+			newCommand = new CommandViewModel("New", new RelayCommand((x) => { InvokeNew(); }));
 
             AutoSuggestVM.SelectedSuggestion = AllCities[1];
 		}
+		private CommandViewModel editCommand;
+		private CommandViewModel newCommand;
 
 		public void InvokeEdit()
 		{
@@ -79,6 +83,22 @@ namespace ControlTestApp.AutoSuggestTextBox
 			//    Cities.Add(vm.City);
 			//}
 			//vm.CitySaved -= new EventHandler(cityEdit_CitySaved);
+		}
+
+		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+		{
+			base.OnPropertyChanged(e);
+
+			if(e.Property == IsInvokeEditAllowedProperty)
+			{
+				if(true.Equals(e.NewValue)) AutoSuggestVM.Commands.Add(editCommand);
+				else AutoSuggestVM.Commands.Remove(editCommand);
+			}
+			else if(e.Property == IsInvokeNewAllowedProperty)
+			{
+				if (true.Equals(e.NewValue)) AutoSuggestVM.Commands.Add(newCommand);
+				else AutoSuggestVM.Commands.Remove(newCommand);
+			}
 		}
 	}
 }
