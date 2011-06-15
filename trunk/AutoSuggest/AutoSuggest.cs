@@ -290,16 +290,6 @@ namespace KO.Controls
 				if (currentSuggestionsListView != null && currentSuggestionsListView.Items.Count > 0 && currentSuggestionsListView.SelectedIndex > 0)
 					currentSuggestionsListView.SelectedIndex -= 1;
 			}
-			//TBD: How do we find out if the user selected the text or we did.
-			//The idea for this is that when we autocomplete the text and the user presses backspace we are deleting the autocompleted text only where the user really wants to delete one more character.
-			//The below code resolves that problem but introduces another problem. If the user manually selects 5 characters and presses the back button to delete them because of this code we delete one more character after the selection.
-			//else if (e.Key == Key.Back || e.Key == Key.Delete)
-			//{
-			//    if (!String.IsNullOrEmpty(TargetTextBox.SelectedText) && TargetTextBox.Text.IndexOf(TargetTextBox.SelectedText) == TargetTextBox.CaretIndex)
-			//    {
-			//        TargetTextBox.Select(TargetTextBox.CaretIndex-1,TargetTextBox.SelectedText.Length+1);
-			//    }
-			//}
 			else if(this.IsOpen)
 			{
 				if (e.Key == Key.Space && (SelectionCommand & SelectionTrigger.Space) == SelectionTrigger.Space
@@ -353,7 +343,7 @@ namespace KO.Controls
 
 		private void ListViewItemDoubleClickHandler(object sender, RoutedEventArgs args)
 		{
-			if (currentSuggestionsListView != null && currentSuggestionsListView.SelectedIndex > 0)
+			if (currentSuggestionsListView != null && currentSuggestionsListView.SelectedIndex >= 0)
 			{
 				selectingItemOrClosingPopup = true;
 				TargetTextBox.Text =  DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(currentSuggestionsListView.SelectedItem);
