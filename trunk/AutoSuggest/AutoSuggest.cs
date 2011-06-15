@@ -574,6 +574,9 @@ namespace KO.Controls
 
 			DataContextAutoSuggestVM.SelectedSuggestionPreview = currentSuggestionsListView.SelectedItem;
 			DataContextAutoSuggestVM.SelectedSuggestion = currentSuggestionsListView.SelectedItem;
+
+			SetSuggestedText(); //This is a minor duplication of code with the Value Changed event of the SelectedSuggestion property but we need it in cases where the user deletes part of the text then selects the same value. In that case Value Changed is not fired and the Text in the textbox gets cleared on lost focus.
+
 			this.IsOpen = false;
 			TargetTextBox.CaretIndex = TargetTextBox.Text.Length;
 			
