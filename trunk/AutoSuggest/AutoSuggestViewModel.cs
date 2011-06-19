@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace KO.Controls
 {
-	public delegate string GetSelectedSuggestionFormattedName (object SelectedSuggestion);
+	public delegate string GetSelectedSuggestionFormattedName (object SelectedSuggestion, bool isConfirm = false);
 
 	public class AutoSuggestViewModel:DependencyObject
 	{

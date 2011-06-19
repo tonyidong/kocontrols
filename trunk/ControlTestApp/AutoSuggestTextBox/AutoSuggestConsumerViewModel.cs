@@ -42,7 +42,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 		{
 			AllCities = TestDataService.GetCities();
 
-			AutoSuggestVM = new AutoSuggestViewModel((x) => { if (x == null)return ""; else return ((City)x).Name; });
+			AutoSuggestVM = new AutoSuggestViewModel((x,y) => { if (x == null)return ""; else return ((City)x).Name; });
 			AutoSuggestVM.FilterItems = new RelayCommand((x) => { AutoSuggestVM.ItemsSource = AllCities.Where(y => y.Name.StartsWith(x.ToString(), StringComparison.CurrentCultureIgnoreCase)).ToList<City>(); });
 			AutoSuggestVM.IsInvalidTextAllowed = true;
 			
