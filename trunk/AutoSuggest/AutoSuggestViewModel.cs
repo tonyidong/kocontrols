@@ -67,7 +67,7 @@ namespace KO.Controls
 				if (!vm1.DoNotChangeText)
 				{
 					vm1.CodeInput = true;
-					vm1.TextBoxText = vm1.GetSelectedSuggestionFormattedName(y.NewValue);
+					vm1.TextBoxText = vm1.GetSelectedSuggestionFormattedName(y.NewValue,true);
 					vm1.CodeInput = false;
 				}
 			})));

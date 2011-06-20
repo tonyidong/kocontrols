@@ -396,7 +396,7 @@ namespace KO.Controls
 			if (DataContextAutoSuggestVM != null && TargetTextBox != null)
 			{
 				if (DataContextAutoSuggestVM.SelectedSuggestion != null)
-					TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestion);
+					TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(DataContextAutoSuggestVM.SelectedSuggestion,true);
 				else
 					TargetTextBox.Text = "";
 			}
