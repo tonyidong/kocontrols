@@ -53,6 +53,7 @@
     <Compile Include="Command\CommandViewModel.cs" />
     <Compile Include="Command\RelayCommand.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\IgnoreNewItemPlaceHolderConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

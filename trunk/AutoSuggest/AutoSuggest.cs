@@ -330,7 +330,6 @@ namespace KO.Controls
 				newListView.PreviewKeyDown += autoSuggest.ListView_PreviewKeyDown;
 				newListView.LostKeyboardFocus += autoSuggest.ListView_LostKeyboardFocus;
 				newListView.SelectionChanged += autoSuggest.ListView_SelectionChanged;
-
 				newListView.AddHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler,true);
 			}
 		}
