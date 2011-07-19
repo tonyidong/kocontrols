@@ -63,8 +63,8 @@ namespace KO.Controls
 			DataContextProperty.OverrideMetadata(typeof(AutoSuggest), new FrameworkPropertyMetadata
 			(
                 null,
-                new PropertyChangedCallback((d, v) => { if (v != null && v.NewValue != null && v.NewValue is AutoSuggestViewModel) { InitializeText(d as AutoSuggest, v.NewValue as AutoSuggestViewModel); } }),
-			    new CoerceValueCallback((d, v) => { if(v != null && !(v is AutoSuggestViewModel)) throw new NotSupportedException(); return v; })
+                new PropertyChangedCallback((d, v) => { if (v.NewValue != null) InitializeText(d as AutoSuggest, v.NewValue as AutoSuggestViewModel); }),
+			    new CoerceValueCallback((d, v) => { return v as AutoSuggestViewModel; })
 			));
 		}
 		public AutoSuggestViewModel DataContextAutoSuggestVM { get { return (AutoSuggestViewModel)base.DataContext; }}
