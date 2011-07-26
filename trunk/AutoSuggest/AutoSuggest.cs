@@ -55,6 +55,7 @@ namespace KO.Controls
 	#endregion 
 
 	//  Copy/Paste does not work.
+	//InitializeTex hooks up an event handler multiple times. It seems that the RemoveValueChanged extention method does not work properly.
 	public class AutoSuggest : Popup
 	{
 		#region Overriding DataContext
@@ -125,7 +126,6 @@ namespace KO.Controls
 		#region Constructors
 		public AutoSuggest()
 		{
-			
 			suggestionsControl = new SuggestionsControl();
 
 			this.Child = suggestionsControl;
@@ -379,13 +379,16 @@ namespace KO.Controls
 					DependencyPropertyDescriptor itemSelectedPreviewDescr = DependencyPropertyDescriptor.FromProperty(AutoSuggestViewModel.SelectedSuggestionProperty, typeof(AutoSuggestViewModel));
 					if (itemSelectedPreviewDescr != null)
 					{
-						itemSelectedPreviewDescr.AddValueChanged(autoSuggestVM, delegate
-						{
-							autoSuggest.SetSuggestedText();
-						});
+						itemSelectedPreviewDescr.RemoveValueChanged(autoSuggestVM, autoSuggest.SetSuggestedTextDelegate);
+						itemSelectedPreviewDescr.AddValueChanged(autoSuggestVM, autoSuggest.SetSuggestedTextDelegate);
 					}
 				}
 			}
+		}
+
+		private void SetSuggestedTextDelegate(object sender, EventArgs args)
+		{
+			SetSuggestedText();
 		}
 
 		private void SetSuggestedText()
@@ -405,7 +408,7 @@ namespace KO.Controls
 
 		private void OpenSuggestions()
 		{
-			if (isTargetTextBoxEditable)
+			if (isTargetTextBoxEditable && DataContextAutoSuggestVM != null)
 			{
 				if (DataContextAutoSuggestVM.FilterItems != null)
 					DataContextAutoSuggestVM.FilterItems.Execute(TargetTextBox.Text);

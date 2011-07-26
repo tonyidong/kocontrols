@@ -15,6 +15,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 {
 	public class AutoSuggestConsumerViewModel : DependencyObject
 	{
+		#region IsInvokeNewAllowed
 		public static readonly DependencyProperty IsInvokeNewAllowedProperty =
 		 DependencyProperty.Register("IsInvokeNewAllowed", typeof(bool),
 		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
@@ -24,7 +25,9 @@ namespace ControlTestApp.AutoSuggestTextBox
 			get { return (bool)GetValue(IsInvokeNewAllowedProperty); }
 			set { SetValue(IsInvokeNewAllowedProperty, value); }
 		}
+		#endregion 
 
+		#region IsInvokeEditAllowed
 		public static readonly DependencyProperty IsInvokeEditAllowedProperty =
 		 DependencyProperty.Register("IsInvokeEditAllowed", typeof(bool),
 		 typeof(AutoSuggestConsumerViewModel), new PropertyMetadata());
@@ -34,6 +37,7 @@ namespace ControlTestApp.AutoSuggestTextBox
 			get { return (bool)GetValue(IsInvokeEditAllowedProperty); }
 			set { SetValue(IsInvokeEditAllowedProperty, value); }
 		}
+		#endregion 
 
 		public IList<City> AllCities { get; set; }
 		public AutoSuggestViewModel AutoSuggestVM { get; private set; }

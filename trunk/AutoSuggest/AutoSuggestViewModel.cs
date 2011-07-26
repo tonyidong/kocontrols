@@ -30,7 +30,7 @@ namespace KO.Controls
 		public bool IsButtonPanelVisible { get { return (bool)GetValue(IsButtonPanelVisibleProperty); } set { SetValue(IsButtonPanelVisibleProperty, value); } }
 		#endregion 
 
-		#region IsButtonPanelVisible
+		#region IsInvalidTextAllowed
 		public static DependencyProperty IsInvalidTextAllowedProperty =
 			DependencyProperty.Register("IsInvalidTextAllowed", typeof(bool), typeof(AutoSuggestViewModel),
 			new PropertyMetadata());
@@ -82,7 +82,7 @@ namespace KO.Controls
 		public ICommand FilterItems { get { return (ICommand)GetValue(FilterItemsProperty); } set { SetValue(FilterItemsProperty, value); } }
 		#endregion 
 
-		#region Selected Suggestion Name
+		#region TextBox Text
 		public static readonly DependencyProperty TextBoxTextProperty =
 			 DependencyProperty.Register("TextBoxText", typeof(string),
 			 typeof(AutoSuggestViewModel), null);

@@ -26,16 +26,16 @@ namespace ControlTestApp.Services
 		{
 			List<City> cities = new List<City>();
 			cities.Add(new City() { Key = 1, Country = Bulgaria, Name="Kostenec" });
-			cities.Add(new City() { Key = 1, Country = Bulgaria, Name = "Kostin Brod" });
-			cities.Add(new City() { Key = 1, Country = Bulgaria, Name = "Kotel" });
-			cities.Add(new City() { Key = 1, Country = Bulgaria, Name = "Kustendil" });
+			cities.Add(new City() { Key = 2, Country = Bulgaria, Name = "Kostin Brod" });
+			cities.Add(new City() { Key = 3, Country = Bulgaria, Name = "Kotel" });
+			cities.Add(new City() { Key = 4, Country = Bulgaria, Name = "Kustendil" });
 
-			cities.Add(new City() { Key = 1, Country = USA, Name = "New Yrok" });
-			cities.Add(new City() { Key = 1, Country = USA, Name = "New Jersey" });
-			cities.Add(new City() { Key = 1, Country = USA, Name = "New Orleans" });
-			cities.Add(new City() { Key = 1, Country = USA, Name = "San Diego" });
-			cities.Add(new City() { Key = 1, Country = USA, Name = "San Jose" });
-			cities.Add(new City() { Key = 1, Country = USA, Name = "Chicago" });
+			cities.Add(new City() { Key = 5, Country = USA, Name = "New Yrok" });
+			cities.Add(new City() { Key = 6, Country = USA, Name = "New Jersey" });
+			cities.Add(new City() { Key = 7, Country = USA, Name = "New Orleans" });
+			cities.Add(new City() { Key = 8, Country = USA, Name = "San Diego" });
+			cities.Add(new City() { Key = 9, Country = USA, Name = "San Jose" });
+			cities.Add(new City() { Key = 10, Country = USA, Name = "Chicago" });
 
 			return cities;
 		}

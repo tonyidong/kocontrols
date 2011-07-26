@@ -35,8 +35,6 @@
 					</ListView.View>
 				</ListView>
 			</koAS:AutoSuggest.SuggestionsListView>
-			<!--<adapticaTextBox:AutoSuggest.SuggestionsListView DisplayName>
-			</adapticaTextBox:AutoSuggest.SuggestionsListView>-->
 		</koAS:AutoSuggest>
 		
 		<StackPanel Grid.Column="2" Grid.RowSpan="2">
