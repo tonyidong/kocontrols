@@ -85,6 +85,64 @@ namespace KO.Controls
 			new PropertyMetadata(new PropertyChangedCallback(SuggestionsListView_Changed)));
 
 		public ListView SuggestionsListView { get { return (ListView)GetValue(SuggestionsListViewProperty); } set { SetValue(SuggestionsListViewProperty, value); } }
+		#region ListView Event Handlers
+
+		private static void SuggestionsListView_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+		{
+			AutoSuggest autoSuggest = (AutoSuggest)sender;
+			if (args.OldValue != null)
+			{
+				ListView oldListView = (ListView)args.NewValue;
+
+				oldListView.PreviewKeyDown -= autoSuggest.ListView_PreviewKeyDown;
+				oldListView.LostKeyboardFocus -= autoSuggest.ListView_LostKeyboardFocus;
+				oldListView.SelectionChanged -= autoSuggest.ListView_SelectionChanged;
+
+				oldListView.RemoveHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler);
+			}
+
+			if (args.NewValue != null)
+			{
+				ListView newListView = (ListView)args.NewValue;
+				autoSuggest.suggestionsControl.itemsSuggestionsListViewContainer.Child = newListView;
+
+				newListView.PreviewKeyDown += autoSuggest.ListView_PreviewKeyDown;
+				newListView.LostKeyboardFocus += autoSuggest.ListView_LostKeyboardFocus;
+				newListView.SelectionChanged += autoSuggest.ListView_SelectionChanged;
+				newListView.AddHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler, true);
+			}
+		}
+
+		private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (e.AddedItems.Count > 0 && DataContextAutoSuggestVM != null)
+				DataContextAutoSuggestVM.SelectedSuggestionPreview = e.AddedItems[0];
+		}
+
+		private void ListViewItemDoubleClickHandler(object sender, RoutedEventArgs args)
+		{
+			if (currentSuggestionsListView != null && currentSuggestionsListView.SelectedIndex >= 0)
+			{
+				selectingItemOrClosingPopup = true;
+				TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(currentSuggestionsListView.SelectedItem);
+				selectingItemOrClosingPopup = false;
+
+				SelectItemAndClose();
+			}
+		}
+
+		private void ListView_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		{
+			HandleLostFocus();
+		}
+
+		private void ListView_PreviewKeyDown(object sender, KeyEventArgs e)
+		{
+			ListView lv = (ListView)sender;
+			if (lv.SelectedItem != null)
+				e.Handled = SelectItemAndTaboutByKeyDownValue(e.Key);
+		}
+		#endregion 
 		#endregion 
 
 		#region Selection Trigger
@@ -308,64 +366,7 @@ namespace KO.Controls
 		}
 		#endregion 
 
-		#region Suggestions ListView Event Handlers
-
-		private static void SuggestionsListView_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
-		{
-			AutoSuggest autoSuggest = (AutoSuggest)sender;
-			if (args.OldValue != null)
-			{
-				ListView oldListView = (ListView)args.NewValue;
-
-				oldListView.PreviewKeyDown -= autoSuggest.ListView_PreviewKeyDown;
-				oldListView.LostKeyboardFocus -= autoSuggest.ListView_LostKeyboardFocus;
-				oldListView.SelectionChanged -= autoSuggest.ListView_SelectionChanged;
-
-				oldListView.RemoveHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler);
-			}
-
-			if (args.NewValue != null)
-			{
-				ListView newListView = (ListView)args.NewValue;
-				autoSuggest.suggestionsControl.itemsSuggestionsListViewContainer.Child = newListView;
-
-				newListView.PreviewKeyDown += autoSuggest.ListView_PreviewKeyDown;
-				newListView.LostKeyboardFocus += autoSuggest.ListView_LostKeyboardFocus;
-				newListView.SelectionChanged += autoSuggest.ListView_SelectionChanged;
-				newListView.AddHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler,true);
-			}
-		}
-
-		private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			if (e.AddedItems.Count > 0)
-				DataContextAutoSuggestVM.SelectedSuggestionPreview = e.AddedItems[0];
-		}
-
-		private void ListViewItemDoubleClickHandler(object sender, RoutedEventArgs args)
-		{
-			if (currentSuggestionsListView != null && currentSuggestionsListView.SelectedIndex >= 0)
-			{
-				selectingItemOrClosingPopup = true;
-				TargetTextBox.Text =  DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(currentSuggestionsListView.SelectedItem);
-				selectingItemOrClosingPopup = false;
-
-				SelectItemAndClose();
-			}
-		}
-
-		private void ListView_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-		{
-			HandleLostFocus();
-		}
-
-		private void ListView_PreviewKeyDown(object sender, KeyEventArgs e)
-		{
-			ListView lv = (ListView)sender;
-			if (lv.SelectedItem != null)
-				e.Handled = SelectItemAndTaboutByKeyDownValue(e.Key);
-		}
-		#endregion 
+		
 
 		#endregion 
 
@@ -395,6 +396,7 @@ namespace KO.Controls
 				DependencyPropertyDescriptor itemSelectedPreviewDescr = DependencyPropertyDescriptor.FromProperty(AutoSuggestViewModel.SelectedSuggestionProperty, typeof(AutoSuggestViewModel));
 				if (itemSelectedPreviewDescr != null)
 					itemSelectedPreviewDescr.RemoveValueChanged(DataContextAutoSuggestVM, SetSuggestedTextDelegate);
+
 			}
 		}
 
