@@ -64,7 +64,7 @@ namespace KO.Controls
 			DataContextProperty.OverrideMetadata(typeof(AutoSuggest), new FrameworkPropertyMetadata
 			(
                 null,
-                new PropertyChangedCallback((d, v) => { if (v.NewValue != null) InitializeText(d as AutoSuggest, v.NewValue as AutoSuggestViewModel); }),
+				new PropertyChangedCallback((d, v) => { if (v.NewValue != null) InitializeText(d as AutoSuggest, v.NewValue as AutoSuggestViewModel, v.OldValue as AutoSuggestViewModel); }),
 			    new CoerceValueCallback((d, v) => { return v as AutoSuggestViewModel; })
 			));
 		}
@@ -219,7 +219,8 @@ namespace KO.Controls
 				newTextBox.LostKeyboardFocus += autoSuggest.TargetTextBox_LostKeyboardFocus;
 				newTextBox.GotKeyboardFocus += autoSuggest.TargetTextBox_GotKeyboardFocus;
 
-                InitializeText(autoSuggest, autoSuggest.DataContextAutoSuggestVM);
+				autoSuggest.SetSuggestedText();
+             //  InitializeText(autoSuggest, autoSuggest.DataContextAutoSuggestVM);
 			}
 		}
 
@@ -272,7 +273,8 @@ namespace KO.Controls
 					}
 					else
 					{
-						DataContextAutoSuggestVM.SelectedSuggestionPreview = null;
+						if(DataContextAutoSuggestVM != null)
+							DataContextAutoSuggestVM.SelectedSuggestionPreview = null;
 					}
 				}
 			}	
@@ -368,21 +370,31 @@ namespace KO.Controls
 		#endregion 
 
 		#region Private Methods
-		private static void InitializeText(AutoSuggest autoSuggest, AutoSuggestViewModel autoSuggestVM)
+		private static void InitializeText(AutoSuggest autoSuggest, AutoSuggestViewModel autoSuggestVM, AutoSuggestViewModel autoSuggestVMOld)
 		{
 			if (autoSuggest != null)
 			{
 				autoSuggest.SetSuggestedText();
 
-				if (autoSuggestVM != null)
+				DependencyPropertyDescriptor itemSelectedPreviewDescr = DependencyPropertyDescriptor.FromProperty(AutoSuggestViewModel.SelectedSuggestionProperty, typeof(AutoSuggestViewModel));
+				if (itemSelectedPreviewDescr != null)
 				{
-					DependencyPropertyDescriptor itemSelectedPreviewDescr = DependencyPropertyDescriptor.FromProperty(AutoSuggestViewModel.SelectedSuggestionProperty, typeof(AutoSuggestViewModel));
-					if (itemSelectedPreviewDescr != null)
-					{
-						itemSelectedPreviewDescr.RemoveValueChanged(autoSuggestVM, autoSuggest.SetSuggestedTextDelegate);
+					if (autoSuggestVMOld != null)
+						itemSelectedPreviewDescr.RemoveValueChanged(autoSuggestVMOld, autoSuggest.SetSuggestedTextDelegate);
+
+					if (autoSuggestVM != null)
 						itemSelectedPreviewDescr.AddValueChanged(autoSuggestVM, autoSuggest.SetSuggestedTextDelegate);
-					}
 				}
+			}
+		}
+
+		public void CleanUp()
+		{
+			if(DataContextAutoSuggestVM != null)
+			{
+				DependencyPropertyDescriptor itemSelectedPreviewDescr = DependencyPropertyDescriptor.FromProperty(AutoSuggestViewModel.SelectedSuggestionProperty, typeof(AutoSuggestViewModel));
+				if (itemSelectedPreviewDescr != null)
+					itemSelectedPreviewDescr.RemoveValueChanged(DataContextAutoSuggestVM, SetSuggestedTextDelegate);
 			}
 		}
 
@@ -436,6 +448,9 @@ namespace KO.Controls
 				}
 
 				this.IsOpen = false;
+
+				if (DataContextAutoSuggestVM == null)
+					return;
 
 				if (String.IsNullOrEmpty(TargetTextBox.Text))
 				{
