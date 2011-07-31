@@ -71,6 +71,14 @@ namespace KO.Controls
 		public AutoSuggestViewModel DataContextAutoSuggestVM { get { return (AutoSuggestViewModel)base.DataContext; }}
 		#endregion 
 
+		//#region Tabout Next Count
+		//public static DependencyProperty TaboutNextCountProperty =
+		//    DependencyProperty.Register("TaboutNextCount", typeof(int), typeof(AutoSuggest),
+		//    new PropertyMetadata(1));
+
+		//public int TaboutNextCount { get { return (int)GetValue(TaboutNextCountProperty); } set { SetValue(TaboutNextCountProperty, value); } }
+		//#endregion 
+
 		#region TargetTextBox
 		public static DependencyProperty TargetTextBoxProperty =
 			DependencyProperty.Register("TargetTextBox",typeof(TextBox),typeof(AutoSuggest),
@@ -278,7 +286,6 @@ namespace KO.Controls
 				newTextBox.GotKeyboardFocus += autoSuggest.TargetTextBox_GotKeyboardFocus;
 
 				autoSuggest.SetSuggestedText();
-             //  InitializeText(autoSuggest, autoSuggest.DataContextAutoSuggestVM);
 			}
 		}
 
@@ -593,6 +600,7 @@ namespace KO.Controls
 		private void TabOutNext()
 		{
 			TargetTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+			
 			selectingItemOrClosingPopup = true;
 			this.IsOpen = false;
 			selectingItemOrClosingPopup = false;
@@ -601,8 +609,10 @@ namespace KO.Controls
 		private void TabOutPrevious()
 		{
 			TargetTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
+
 			selectingItemOrClosingPopup = true;
 			this.IsOpen = false;
+			selectingItemOrClosingPopup = false;
 		}
 		#endregion 
 	}
