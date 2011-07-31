@@ -290,7 +290,7 @@ namespace KO.Controls
 
 		private void TargetTextBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (selectingItemOrClosingPopup || (DataContextAutoSuggestVM != null && DataContextAutoSuggestVM.CodeInput)) { return; }
+			if (selectingItemOrClosingPopup || DataContextAutoSuggestVM == null || DataContextAutoSuggestVM.CodeInput) { return; }
 			
 			if (isTargetTextBoxEditable)
 			{
@@ -365,8 +365,6 @@ namespace KO.Controls
 			HandleLostFocus();
 		}
 		#endregion 
-
-		
 
 		#endregion 
 
@@ -518,7 +516,7 @@ namespace KO.Controls
 				//selectingItemOrClosingPopup = true;
                 cancelWindowKeyDown = true;
 			}
-			else if (keyDown == Key.Right && keyDown == Key.Left)
+			else if (keyDown == Key.Right || keyDown == Key.Left)
 			{
 				if ((SelectionCommand & SelectionTrigger.Arrows) == SelectionTrigger.Arrows)
 				{
