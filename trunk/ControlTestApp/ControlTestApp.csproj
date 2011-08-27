@@ -56,6 +56,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AutoSuggestTextBox\AutoSuggestConsumerViewModel.cs" />
+    <Compile Include="AutoSuggestTextBox\AutoSuggestTextBoxTestDataGrid.xaml.cs">
+      <DependentUpon>AutoSuggestTextBoxTestDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AutoSuggestTextBox\CityEditVM.cs" />
     <Compile Include="AutoSuggestTextBox\CityEditWindow.xaml.cs">
       <DependentUpon>CityEditWindow.xaml</DependentUpon>
@@ -66,6 +69,10 @@
     <Compile Include="Services\TestDataService.cs" />
     <Compile Include="TestAppViewModel.cs" />
     <Page Include="AutoSuggestTextBox\AutoSuggestTextBoxTest.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AutoSuggestTextBox\AutoSuggestTextBoxTestDataGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

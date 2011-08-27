@@ -38,7 +38,7 @@
                         ContentTemplate="{StaticResource CommandsTemplate}" 
                         Visibility="{Binding Path=IsButtonPanelVisible, Mode=OneWay,Converter={x:Static cs:BooleanToVisibilityConverter.Instance}}" />
 
-        <Border Name="itemsSuggestionsListViewContainer">
+		<Border Name="itemsSuggestionsSelectorContainer">
 			<ListView DockPanel.Dock="Top">
 				<GridView>
 

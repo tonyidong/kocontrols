@@ -9,5 +9,9 @@
 		<TabItem Header="Auto Suggest">
 			<test:AutoSuggestTextBoxTest DataContext="{Binding AutoSuggestConsumerViewModel}"></test:AutoSuggestTextBoxTest>
 		</TabItem>
+		
+		<TabItem Header="Auto Suggest DataGrid">
+			<test:AutoSuggestTextBoxTestDataGrid DataContext="{Binding AutoSuggestConsumerViewModel}"></test:AutoSuggestTextBoxTestDataGrid>	
+		</TabItem>
 	</TabControl>
 </Window>

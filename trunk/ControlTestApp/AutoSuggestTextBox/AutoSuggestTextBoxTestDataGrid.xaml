@@ -1,5 +1,5 @@
-﻿<UserControl x:Class="ControlTestApp.AutoSuggestTextBox.AutoSuggestTextBoxTest"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<UserControl x:Class="ControlTestApp.AutoSuggestTextBox.AutoSuggestTextBoxTestDataGrid"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -11,13 +11,13 @@
 			<Setter Property="Visibility" Value="Collapsed" />
 		</Style>
 	</UserControl.Resources>
-    <Grid>
+	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition  Width="100"/>
 			<ColumnDefinition Width="150"/>
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
-		
+
 		<Label Grid.Column="0" Content="City:" HorizontalAlignment="Right" />
 		<TextBox Grid.Column="1" Width="140" Height="22" Padding="0, 3, 0, 0" VerticalAlignment="Top"
 				 Name="cityTextBox"/>
@@ -26,17 +26,15 @@
 						  TaboutCommand="ArrowsEnterEscape" 
 						  SelectionCommand="SpaceTabArrows">
 			<koAS:AutoSuggest.SuggestionsSelector>
-				<ListView ItemsSource="{Binding ItemsSource}">
-					<ListView.View>
-						<GridView ColumnHeaderContainerStyle="{StaticResource hiddenHeaderStyle}">
-						<GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" />
-						<GridViewColumn Header="Country name" DisplayMemberBinding="{Binding Country.Name}" />
-					</GridView>
-					</ListView.View>
-				</ListView>
+				<DataGrid ItemsSource="{Binding ItemsSource}" AutoGenerateColumns="False" HeadersVisibility="None" IsReadOnly="True">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Name"  Binding="{Binding Name}" />
+						<DataGridTextColumn Header="Country Name" Binding="{Binding Country.Name}" />
+					</DataGrid.Columns>
+				</DataGrid>
 			</koAS:AutoSuggest.SuggestionsSelector>
 		</koAS:AutoSuggest>
-		
+
 		<StackPanel Grid.Column="2" Grid.RowSpan="2">
 			<CheckBox Margin="5"
 				Content="Allow invalid values" IsChecked="{Binding AutoSuggestVM.IsInvalidTextAllowed}"/>

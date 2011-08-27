@@ -87,66 +87,67 @@ namespace KO.Controls
 		public TextBox TargetTextBox{get{return (TextBox)GetValue(TargetTextBoxProperty);}	set	{SetValue(TargetTextBoxProperty, value);}}
 		#endregion 
 
-		#region SuggestionsListView
-		public static DependencyProperty SuggestionsListViewProperty =
-			DependencyProperty.Register("SuggestionsListView", typeof(ListView), typeof(AutoSuggest),
-			new PropertyMetadata(new PropertyChangedCallback(SuggestionsListView_Changed)));
+		#region SuggestionsSelector
+		public static DependencyProperty SuggestionsSelectorProperty =
+			DependencyProperty.Register("SuggestionsSelector", typeof(Selector), typeof(AutoSuggest),
+			new PropertyMetadata(new PropertyChangedCallback(SuggestionsSelector_Changed)));
 
-		public ListView SuggestionsListView { get { return (ListView)GetValue(SuggestionsListViewProperty); } set { SetValue(SuggestionsListViewProperty, value); } }
-		#region ListView Event Handlers
+		public Selector SuggestionsSelector { get { return (Selector)GetValue(SuggestionsSelectorProperty); } set { SetValue(SuggestionsSelectorProperty, value); } }
+		#region Selector Event Handlers
 
-		private static void SuggestionsListView_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+		private static void SuggestionsSelector_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs args)
 		{
 			AutoSuggest autoSuggest = (AutoSuggest)sender;
 			if (args.OldValue != null)
 			{
-				ListView oldListView = (ListView)args.NewValue;
+				Selector oldSelector = (Selector)args.NewValue;
 
-				oldListView.PreviewKeyDown -= autoSuggest.ListView_PreviewKeyDown;
-				oldListView.LostKeyboardFocus -= autoSuggest.ListView_LostKeyboardFocus;
-				oldListView.SelectionChanged -= autoSuggest.ListView_SelectionChanged;
+				oldSelector.PreviewKeyDown -= autoSuggest.Selector_PreviewKeyDown;
+				oldSelector.LostKeyboardFocus -= autoSuggest.Selector_LostKeyboardFocus;
+				oldSelector.SelectionChanged -= autoSuggest.Selector_SelectionChanged;
 
-				oldListView.RemoveHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler);
+				oldSelector.RemoveHandler(Control.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.SelectorItemDoubleClickHandler);
 			}
 
 			if (args.NewValue != null)
 			{
-				ListView newListView = (ListView)args.NewValue;
-				autoSuggest.suggestionsControl.itemsSuggestionsListViewContainer.Child = newListView;
+				Selector newSelector = (Selector)args.NewValue;
+				autoSuggest.suggestionsControl.itemsSuggestionsSelectorContainer.Child = newSelector;
 
-				newListView.PreviewKeyDown += autoSuggest.ListView_PreviewKeyDown;
-				newListView.LostKeyboardFocus += autoSuggest.ListView_LostKeyboardFocus;
-				newListView.SelectionChanged += autoSuggest.ListView_SelectionChanged;
-				newListView.AddHandler(ListViewItem.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.ListViewItemDoubleClickHandler, true);
+				newSelector.PreviewKeyDown += autoSuggest.Selector_PreviewKeyDown;
+				newSelector.LostKeyboardFocus += autoSuggest.Selector_LostKeyboardFocus;
+				newSelector.SelectionChanged += autoSuggest.Selector_SelectionChanged;
+
+				newSelector.AddHandler(Control.MouseDoubleClickEvent, (RoutedEventHandler)autoSuggest.SelectorItemDoubleClickHandler, true);
 			}
 		}
 
-		private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void Selector_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			if (e.AddedItems.Count > 0 && DataContextAutoSuggestVM != null)
 				DataContextAutoSuggestVM.SelectedSuggestionPreview = e.AddedItems[0];
 		}
 
-		private void ListViewItemDoubleClickHandler(object sender, RoutedEventArgs args)
+		private void SelectorItemDoubleClickHandler(object sender, RoutedEventArgs args)
 		{
-			if (currentSuggestionsListView != null && currentSuggestionsListView.SelectedIndex >= 0)
+			if (currentSuggestionsSelector != null && currentSuggestionsSelector.SelectedIndex >= 0)
 			{
 				selectingItemOrClosingPopup = true;
-				TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(currentSuggestionsListView.SelectedItem);
+				TargetTextBox.Text = DataContextAutoSuggestVM.GetSelectedSuggestionFormattedName(currentSuggestionsSelector.SelectedItem);
 				selectingItemOrClosingPopup = false;
 
 				SelectItemAndClose();
 			}
 		}
 
-		private void ListView_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		private void Selector_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
 			HandleLostFocus();
 		}
 
-		private void ListView_PreviewKeyDown(object sender, KeyEventArgs e)
+		private void Selector_PreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			ListView lv = (ListView)sender;
+			Selector lv = (Selector)sender;
 			if (lv.SelectedItem != null)
 				e.Handled = SelectItemAndTaboutByKeyDownValue(e.Key);
 		}
@@ -175,12 +176,12 @@ namespace KO.Controls
 		private bool selectingItemOrClosingPopup = false;
         private Window window;
 
-		private ListView currentSuggestionsListView
+		private Selector currentSuggestionsSelector
 		{
 			get
 			{
-				if(suggestionsControl.itemsSuggestionsListViewContainer.Child != null && suggestionsControl.itemsSuggestionsListViewContainer.Child is ListView)
-					return suggestionsControl.itemsSuggestionsListViewContainer.Child as ListView;
+				if(suggestionsControl.itemsSuggestionsSelectorContainer.Child != null && suggestionsControl.itemsSuggestionsSelectorContainer.Child is Selector)
+					return suggestionsControl.itemsSuggestionsSelectorContainer.Child as Selector;
 				return null;
 			}
 		}
@@ -303,11 +304,11 @@ namespace KO.Controls
 			{
 				OpenSuggestions();
 
-				if (currentSuggestionsListView != null)
+				if (currentSuggestionsSelector != null)
 				{
-					if (currentSuggestionsListView.Items.Count > 0)
+					if (currentSuggestionsSelector.Items.Count > 0)
 					{
-						currentSuggestionsListView.SelectedIndex = 0;
+						currentSuggestionsSelector.SelectedIndex = 0;
 
 						selectingItemOrClosingPopup = true;
 						try
@@ -349,18 +350,18 @@ namespace KO.Controls
 		{
 			if (e.Key == System.Windows.Input.Key.Down && this.IsOpen)
 			{
-				if (currentSuggestionsListView != null && currentSuggestionsListView.Items.Count > 0 && currentSuggestionsListView.Items.Count > currentSuggestionsListView.SelectedIndex)
-					currentSuggestionsListView.SelectedIndex += 1;
+				if (currentSuggestionsSelector != null && currentSuggestionsSelector.Items.Count > 0 && currentSuggestionsSelector.Items.Count > currentSuggestionsSelector.SelectedIndex)
+					currentSuggestionsSelector.SelectedIndex += 1;
 			}
 			else if (e.Key == System.Windows.Input.Key.Up && this.IsOpen)
 			{
-				if (currentSuggestionsListView != null && currentSuggestionsListView.Items.Count > 0 && currentSuggestionsListView.SelectedIndex > 0)
-					currentSuggestionsListView.SelectedIndex -= 1;
+				if (currentSuggestionsSelector != null && currentSuggestionsSelector.Items.Count > 0 && currentSuggestionsSelector.SelectedIndex > 0)
+					currentSuggestionsSelector.SelectedIndex -= 1;
 			}
 			else if(this.IsOpen)
 			{
 				if (e.Key == Key.Space && (SelectionCommand & SelectionTrigger.Space) == SelectionTrigger.Space
-					&& (currentSuggestionsListView == null || currentSuggestionsListView.Items.Count != 1))
+					&& (currentSuggestionsSelector == null || currentSuggestionsSelector.Items.Count != 1))
 					return;
 
 				e.Handled = SelectItemAndTaboutByKeyDownValue(e.Key);
@@ -433,7 +434,7 @@ namespace KO.Controls
 					DataContextAutoSuggestVM.FilterItems.Execute(TargetTextBox.Text);
 
 				//IF there are suggestions or command open the popup
-				if (currentSuggestionsListView != null && (currentSuggestionsListView.Items.Count > 0 
+				if (currentSuggestionsSelector != null && (currentSuggestionsSelector.Items.Count > 0 
 							|| (DataContextAutoSuggestVM != null && DataContextAutoSuggestVM.Commands.Count > 0)))
 					this.IsOpen = true;
 				else
@@ -445,11 +446,11 @@ namespace KO.Controls
 		{
 			if ((!this.IsKeyboardFocused && !this.IsKeyboardFocusWithin)
 				&& (TargetTextBox != null && !TargetTextBox.IsKeyboardFocused)
-				&& (currentSuggestionsListView != null && !currentSuggestionsListView.IsKeyboardFocused))
+				&& (currentSuggestionsSelector != null && !currentSuggestionsSelector.IsKeyboardFocused))
 			{
-				if (currentSuggestionsListView.SelectedIndex >= 0)
+				if (currentSuggestionsSelector.SelectedIndex >= 0)
 				{
-					ListViewItem item = currentSuggestionsListView.ItemContainerGenerator.ContainerFromIndex(currentSuggestionsListView.SelectedIndex) as ListViewItem;
+					FrameworkElement item = currentSuggestionsSelector.ItemContainerGenerator.ContainerFromIndex(currentSuggestionsSelector.SelectedIndex) as FrameworkElement;
 					if (item != null && (item.IsKeyboardFocused || item.IsKeyboardFocusWithin))
 						return;
 				}
@@ -572,22 +573,12 @@ namespace KO.Controls
 			return handled;
 		}
 
-		//private void FocusSelectedListViewElement()
-		//{
-		//    if (currentSuggestionsListView.SelectedIndex >= 0)
-		//    {
-		//        ListViewItem item = currentSuggestionsListView.ItemContainerGenerator.ContainerFromIndex(currentSuggestionsListView.SelectedIndex) as ListViewItem;
-		//        if (item != null)
-		//            item.Focus();
-		//    }
-		//}
-
 		private void SelectItemAndClose()
 		{
 			selectingItemOrClosingPopup = true;
 
-			DataContextAutoSuggestVM.SelectedSuggestionPreview = currentSuggestionsListView.SelectedItem;
-			DataContextAutoSuggestVM.SelectedSuggestion = currentSuggestionsListView.SelectedItem;
+			DataContextAutoSuggestVM.SelectedSuggestionPreview = currentSuggestionsSelector.SelectedItem;
+			DataContextAutoSuggestVM.SelectedSuggestion = currentSuggestionsSelector.SelectedItem;
 
 			SetSuggestedText(); //This is a minor duplication of code with the Value Changed event of the SelectedSuggestion property but we need it in cases where the user deletes part of the text then selects the same value. In that case Value Changed is not fired and the Text in the textbox gets cleared on lost focus.
 
