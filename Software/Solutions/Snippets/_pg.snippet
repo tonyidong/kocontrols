@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets  xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+	<CodeSnippet Format="1.0.0">
+		<Header>
+			<Title>DependencyProperty with public get and public set</Title>
+			<Shortcut>_pg</Shortcut>
+			<Author>KOControls</Author>
+			<SnippetTypes>
+				<SnippetType>Expansion</SnippetType>
+			</SnippetTypes>
+		</Header>
+		<Snippet>
+			<Declarations>
+				<Literal>
+					<ID>Name</ID>
+					<ToolTip>Name</ToolTip>
+					<Default>Name</Default>
+				</Literal>
+				<Literal>
+					<ID>Type</ID>
+					<ToolTip>Type</ToolTip>
+					<Default>object</Default>
+				</Literal>
+				<Literal>
+					<ID>Owner</ID>
+					<ToolTip>Owner</ToolTip>
+					<Default>ViewModel</Default>
+				</Literal>
+			</Declarations>
+			<Code Language="csharp">
+				<![CDATA[#region $Name$
+private static readonly DependencyPropertyKey $Name$PropertyKey = ViewModel.RegisterReadOnlyProperty<$Type$, $Owner$>("$Name$");
+public static DependencyProperty $Name$Property { get { return $Name$PropertyKey.DependencyProperty; } }
+public $Type$ $Name$ { get { return ($Type$)GetValue($Name$PropertyKey); } private set { SetValue($Name$PropertyKey, value); } }
+#endregion]]>
+			</Code>
+		</Snippet>
+	</CodeSnippet>
+</CodeSnippets>
