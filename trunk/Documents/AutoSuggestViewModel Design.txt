@@ -1,0 +1,60 @@
+Properties:
+SuggestionsSource
+	Normally keeps reference to all suggestions to be used by the Filter delegate
+Suggestions
+	Keeps the filtered suggestions returned by the Filter delegate
+SuggestionToStringConverter
+	Helps to properly convert a suggestion to text. Used by the default Filter implementation as well as the default Item display.
+string FilterInput
+	Normally one way binding from a TextBox to be used by the Filter delegate
+Func<AutoSuggestViewModel, IEnumerable> Filter
+	Returns the filtered enumerable for the inputed AutoSuggestViewModel. The default behavior is: for each in SuggestionsSource, autoSuggest.FilterInput.StartsWith(autoSuggest.SuggestionToString(next), StringComparison.CurrentCultureIgnoreCase)
+
+SuggestionPreview
+	Keeps the current suggested value or free text (see the logic breakdown below)
+Suggestion
+	Keeps the last confirmed suggested value or free text (see the logic breakdown below)
+
+bool IsFreeTextAllowed - determines if free text can be entered by the user and assigned to the SuggestionPreview and Suggestion proerties
+bool IsEmptyValueAllowed - determines if empty suggestion value is accepted even if free text is not allowed
+object EmptyValue - suggestion value to be used if no text is entered in the text box. Defaulted to null
+
+Triggers:
+Enter (Mouse Double Click), Esc, LostFocus
+
+Actions:
+1. Confirm - confirm is based on the following conditions (if conditions are not met confirm will be implicitly replaced by Cancel):
+	Triggers: Enter (Mouse Double Click), LostFocus
+	i) Text is Empty
+		1. IsEmptyValueAllowed == true
+			Confirm -> Suggestion = SuggestionPreview = EmptyValue
+		2. IsEmptyValueAllowed == false
+			Cancel
+	ii) Text is invalid
+		1. IsFreeTextAllowed  == true
+			Confirm -> Suggestion = SuggestionPreview = Text
+		2. IsFreeTextAllowed  == false
+			Cancel
+	iii) Text is valid
+			Confirm -> Suggestion = SuggestionPreview
+		
+2. Cancel - if control looses focus and confirm fails, cancel will take place
+	Triggers: Esc, LostFocus (if confirm fails)
+
+3. MoveFocus away - listed triggers are in addition to any other means of loosing focus such as Tab-out, mouse click in other controls or deactivate/close window etc.
+	Triggers: Arrows, Space, Enter
+
+4. IsFreeTextAllowed = true and Commiting invalid text
+	Make event or delegate which is invoked just before committing to convert the freetext to Suggestion object.
+	Make sure that when the user exists the textbox then brings back the focus in the textbox the previously selected freetext/invalid text stays.
+	
+Test cases:
+1. Test with empty collection
+2. Test with copy and paste
+
+ApplyFilter should not set suggestionpreview.
+UI sets suggestiopreview with the following sequence of events:
+	1. Rise a flag that I am setting seuggestion preview
+	2. Set suggestionpreview
+	3. Reset flag that I am setting suggestion preview.
+	4. Validate suggestion preview and if not valid set it to null.
