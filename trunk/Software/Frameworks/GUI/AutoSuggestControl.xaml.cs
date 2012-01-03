@@ -6,13 +6,23 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using KOControls.Core;
 using KOControls.GUI.Core;
+using System.Diagnostics;
 
 namespace KOControls.GUI
 {
 	#region enums
 	[Flags]
+	public enum ApplyFilterTriggers
+	{
+		None = 0,
+		FilterInputChanged = 1,
+		Enter = 2
+	}
+
+	[Flags]
 	public enum ConfirmTriggers
 	{
+		None = 0,
 		Space = 1,
 		Tab = 2,
 		Arrows = 4,
@@ -34,6 +44,7 @@ namespace KOControls.GUI
 	[Flags]
 	public enum TaboutTriggers
 	{
+		None = 0,
 		Space = 1,
 		Arrows = 2,
 		Enter = 4,
@@ -49,10 +60,10 @@ namespace KOControls.GUI
 	public class AutoSuggestControl : Control
 	{
 		#region Construction
-		private static readonly ResourceDictionary ResourceDictionary = new ResourceDictionary { Source = new Uri("pack://application:,,,/KOControls.GUI;component/AutoSuggestControl.xaml") };
-		public static readonly ControlTemplate Default_Template;
-		public static readonly ControlTemplate Default_CommandsTemplate;
-		public static readonly ControlTemplate Default_SuggestionsTemplate;
+		protected static readonly ResourceDictionary ResourceDictionary = new ResourceDictionary { Source = new Uri("pack://application:,,,/KOControls.GUI;component/AutoSuggestControl.xaml") };
+		private static readonly ControlTemplate Default_Template;
+		private static readonly ControlTemplate Default_CommandsTemplate;
+		private static readonly ControlTemplate Default_SuggestionsTemplate;
 
 		static AutoSuggestControl()
 		{
@@ -60,17 +71,17 @@ namespace KOControls.GUI
 			Default_CommandsTemplate = (ControlTemplate)ResourceDictionary["AutoSuggestControl_Default_CommandsTemplate"];
 			Default_SuggestionsTemplate = (ControlTemplate)ResourceDictionary["AutoSuggestControl_Default_SuggestionsTemplate"];
 
-			ViewModel.OverrideProperty<AutoSuggestControl>(FrameworkElement.DataContextProperty, null, Dependents_Changed, (d, v) => { Dependents_Changing(d, v); return v as AutoSuggestViewModel; });
+			ViewModel.OverrideProperty<AutoSuggestControl>(FrameworkElement.DataContextProperty, null, Dependents_Changed, (d, v) => { Dependents_Changing(d, v);  return v as AutoSuggestViewModel; });
 			ViewModel.OverrideProperty<AutoSuggestControl>(TemplateProperty, Default_Template, Dependents_Changed, (d, v) => { Dependents_Changing(d, v); return v; });
 
 			DataContextProperty = ViewModel.IsInDesignMode ? ViewModel.RegisterProperty<AutoSuggestControl, AutoSuggestViewModel>("DataContext") : FrameworkElement.DataContextProperty;
 		}
+
 		public AutoSuggestControl()
 		{
 			Loaded += OnLoaded;
-
+			//TBD: This line below is going to brake changes in CommandsTemplate in datagrid templated column!!!!
 			CommandsTemplate = Default_CommandsTemplate;
-			SuggestionsTemplate = Default_SuggestionsTemplate;
 
 			ApplyTemplate();
 		}
@@ -86,6 +97,8 @@ namespace KOControls.GUI
 		}
 		private Control _commandsContentPresenter;
 		private Control _suggestionsContentPresenter;
+		private Label _searchCriteria;
+
 		private Selector _selector;
 		#endregion
 
@@ -103,6 +116,10 @@ namespace KOControls.GUI
 		public new static readonly DependencyProperty DataContextProperty;
 		public new AutoSuggestViewModel DataContext { get { return (AutoSuggestViewModel)base.DataContext; } set { base.DataContext = value; } }
 		#endregion
+
+		#region StyleModel
+		private AutoSuggestControlStyleViewModel StyleModel { get { if (DataContext != null) return DataContext.StyleModel as AutoSuggestControlStyleViewModel; else return null; } }
+		#endregion 
 
 		#region TargetTextBox
 		public static readonly DependencyProperty TargetTextBoxProperty = ViewModel.RegisterProperty<TextBox, AutoSuggestControl>("TargetTextBox", null, Dependents_Changed, Dependents_Changing);
@@ -131,29 +148,25 @@ namespace KOControls.GUI
 		}
 		#endregion
 
-		#region ConfirmTrigger
-		public static readonly DependencyProperty SelectionTriggerProperty = ViewModel.RegisterProperty<ConfirmTriggers, AutoSuggestViewModel>("ConfirmTrigger", ConfirmTriggers.SpaceTabArrows);
-		public ConfirmTriggers ConfirmTrigger { get { return (ConfirmTriggers)GetValue(SelectionTriggerProperty); } set { SetValue(SelectionTriggerProperty, value); } }
-		#endregion
+		protected bool _initialized;
+		private static object Dependents_Changing2(DependencyObject d, object v)
+		{
+			return Dependents_Changing(d, v);
+		}
 
-		#region TaboutTrigger
-		public static readonly DependencyProperty TaboutCommandProperty = ViewModel.RegisterProperty<TaboutTriggers, AutoSuggestViewModel>("TaboutTrigger", TaboutTriggers.Enter);
-		public TaboutTriggers TaboutTrigger { get { return (TaboutTriggers)GetValue(TaboutCommandProperty); } set { SetValue(TaboutCommandProperty, value); } }
-		#endregion
-
-		private bool _initialized;
 		private static object Dependents_Changing(DependencyObject d, object v)
 		{
 			var asc = (AutoSuggestControl)d;
 			if(asc._initialized)
 			{
 				asc._initialized = false;
-				ClearEvents(asc);
+				asc.ClearEvents();
 			}
 
 			return v;
 		}
-		private static void Dependents_Changed(DependencyObject d, DependencyPropertyChangedEventArgs a)
+		
+		protected static void Dependents_Changed(DependencyObject d, DependencyPropertyChangedEventArgs a)
 		{
 			var asc = (AutoSuggestControl)d;
 			if(asc._initialized || !asc.IsLoaded || asc.Template == null || asc.DataContext == null || asc.SuggestionsTemplate == null || asc.TargetTextBox == null)
@@ -163,65 +176,82 @@ namespace KOControls.GUI
 			asc._suggestionsContentPresenter.Template = asc.SuggestionsTemplate;
 			asc._suggestionsContentPresenter.ApplyTemplate();
 			asc._selector = (Selector)asc._suggestionsContentPresenter.Template.FindName("PART_Selector", asc._suggestionsContentPresenter);
-
-			asc._commandsContentPresenter = (Control)asc.Template.FindName("_commandsContentPresenter", asc);
+			asc._searchCriteria = asc.Template.FindName("PART_SearchCriteria", asc) as Label;
+			 
+			asc._commandsContentPresenter	 = (Control)asc.Template.FindName("_commandsContentPresenter", asc);
 			asc._commandsContentPresenter.Template = asc.CommandsTemplate;
 			asc._commandsContentPresenter.ApplyTemplate();
 
 			asc._initialized = true;
-			WireUpEvents(asc);
+			asc.WireUpEvents();
 		}
 
-		private static void ClearEvents(AutoSuggestControl asc)
+		protected virtual void ClearEvents()
 		{
-			if(asc.DataContext != null)
+			if(DataContext != null)
 			{
-				asc.DataContext.Refreshed -= asc.DataContext_Refreshed;
-				asc.DataContext.PropertyChanged -= asc.DataContext_PropertyChanged;
-				asc.DataContext.FilterApplied -= asc.DataContext_FilterApplied;
+				DataContext.Refreshed -= DataContext_Refreshed;
+				DataContext.PropertyChanged -= DataContext_PropertyChanged;
+				DataContext.FilterApplied -= DataContext_FilterApplied;
+				if(StyleModel != null)
+					StyleModel.RemoveValueChanged(AutoSuggestControlStyleViewModel.IsFilterTextDisplayedProperty, IsShowFilterTextInControlChanged);
 			}
-			if(asc._selector != null)
+			if(_selector != null)
 			{
-				asc._selector.SelectionChanged -= asc.Selector_SelectionChanged;
-				asc._selector.RemoveHandler(MouseDoubleClickEvent, (RoutedEventHandler)asc.Selector_MouseDoubleClick);
+				_selector.SelectionChanged -= Selector_SelectionChanged;
+				_selector.RemoveHandler(MouseDoubleClickEvent, (RoutedEventHandler)Selector_MouseDoubleClick);
 
-				asc._selector.PreviewKeyDown -= asc.HandleKeyDown;
-				asc._selector.PreviewKeyUp -= asc.HandleKeyUp;
-				asc._selector.LostKeyboardFocus -= asc.HandleLostKeyboardFocus;
+				_selector.PreviewKeyDown -= HandleKeyDown;
+				_selector.PreviewKeyUp -= HandleKeyUp;
+				_selector.LostKeyboardFocus -= HandleLostKeyboardFocus;
 			}
-			if(asc.TargetTextBox != null)
+			if(TargetTextBox != null)
 			{
-				asc.TargetTextBox.PreviewTextInput -= asc.TargetTextBox_TextInput;
-				asc.TargetTextBox.TextChanged -= asc.TargetTextBox_TextChanged;
-				asc.TargetTextBox.PreviewKeyDown -= asc.HandleKeyDown;
-				asc.TargetTextBox.PreviewKeyUp -= asc.HandleKeyUp;
-				asc.TargetTextBox.GotKeyboardFocus -= asc.HandleGotKeyboardFocus;
-				asc.TargetTextBox.LostKeyboardFocus -= asc.HandleLostKeyboardFocus;
+				TargetTextBox.PreviewTextInput -= TargetTextBox_TextInput;
+				TargetTextBox.TextChanged -= TargetTextBox_TextChanged;
+				TargetTextBox.PreviewKeyDown -= HandleKeyDown;
+				TargetTextBox.PreviewKeyUp -= HandleKeyUp;
+				TargetTextBox.GotKeyboardFocus -= HandleGotKeyboardFocus;
+				TargetTextBox.LostKeyboardFocus -= HandleLostKeyboardFocus;
 			}
 		}
 
-		private static void WireUpEvents(AutoSuggestControl asc)
+		private void IsShowFilterTextInControlChanged(object sender, EventArgs args)
 		{
-			ClearEvents(asc);
+			if (_searchCriteria != null)
+			{
+				if (StyleModel.IsFilterTextDisplayed)
+					_searchCriteria.Height = 25;
+				else
+					_searchCriteria.Height = 0;
 
-			asc.DataContext.Refreshed += asc.DataContext_Refreshed;
-			asc.DataContext.PropertyChanged += asc.DataContext_PropertyChanged;
-			asc.DataContext.FilterApplied += asc.DataContext_FilterApplied;
+				_searchCriteria.Content = TargetTextBoxText;
+			}
+		}
 
-			asc._selector.SelectionChanged += asc.Selector_SelectionChanged;
-			asc._selector.AddHandler(Control.MouseDoubleClickEvent, (RoutedEventHandler)asc.Selector_MouseDoubleClick, true);
-			asc._selector.PreviewKeyDown += asc.HandleKeyDown;
-			asc._selector.PreviewKeyUp += asc.HandleKeyUp;
-			asc._selector.LostKeyboardFocus += asc.HandleLostKeyboardFocus;
+		protected virtual void WireUpEvents()
+		{
+			ClearEvents();
 
-			asc.TargetTextBox.PreviewTextInput += asc.TargetTextBox_TextInput;
-			asc.TargetTextBox.TextChanged += asc.TargetTextBox_TextChanged;
-			asc.TargetTextBox.PreviewKeyDown += asc.HandleKeyDown;
-			asc.TargetTextBox.PreviewKeyUp += asc.HandleKeyUp;
-			asc.TargetTextBox.GotKeyboardFocus += asc.HandleGotKeyboardFocus;
-			asc.TargetTextBox.LostKeyboardFocus += asc.HandleLostKeyboardFocus;
+			DataContext.Refreshed += DataContext_Refreshed;
+			DataContext.PropertyChanged += DataContext_PropertyChanged;
+			DataContext.FilterApplied += DataContext_FilterApplied;
+			StyleModel.AddValueChanged(AutoSuggestControlStyleViewModel.IsFilterTextDisplayedProperty,IsShowFilterTextInControlChanged);
 
-			asc.SetTargetTextBoxTextToSuggestionString();
+			_selector.SelectionChanged += Selector_SelectionChanged;
+			_selector.AddHandler(Control.MouseDoubleClickEvent, (RoutedEventHandler)Selector_MouseDoubleClick, true);
+			_selector.PreviewKeyDown += HandleKeyDown;
+			_selector.PreviewKeyUp += HandleKeyUp;
+			_selector.LostKeyboardFocus += HandleLostKeyboardFocus;
+
+			TargetTextBox.PreviewTextInput += TargetTextBox_TextInput;
+			TargetTextBox.TextChanged += TargetTextBox_TextChanged;
+			TargetTextBox.PreviewKeyDown += HandleKeyDown;
+			TargetTextBox.PreviewKeyUp += HandleKeyUp;
+			TargetTextBox.GotKeyboardFocus += HandleGotKeyboardFocus;
+			TargetTextBox.LostKeyboardFocus += HandleLostKeyboardFocus;
+
+			SetTargetTextBoxTextToSuggestionString();
 		}
 
 		private void ApplyFilterAndShowSuggestions()
@@ -235,21 +265,18 @@ namespace KOControls.GUI
 		private void DataContext_FilterApplied()
 		{
 			_suggestionPreviewChanging = true;//Prevent SuggestionPreview being fired from SelectedItem_Changed in _selector. We want to explictly call it in this method.
-
 			try
 			{
 				if(_deletingText)
 				{
 					_selector.SelectedIndex = -1;
-					_suggestionPreviewChanging = false;
-
-					SetSuggestionPreview();
 				}
 				else
 				{
 					if(_selector.ItemsSource.Count() > 0)
 					{
-						if(String.IsNullOrEmpty(TargetTextBoxText) && DataContext.IsEmptyValueAllowed)
+						if(!StyleModel.IsAutoCompleteOn 
+							|| (String.IsNullOrEmpty(TargetTextBoxText) && DataContext.IsEmptyValueAllowed))
 							_selector.SelectedIndex = -1;
 						else
 							_selector.SelectedIndex = 0;
@@ -258,15 +285,16 @@ namespace KOControls.GUI
 					{
 						_selector.SelectedIndex = -1;
 					}
-					_suggestionPreviewChanging = false;
-					SetSuggestionPreview();
-					SetTargetTextBoxTextToSuggestionPreviewString();
 				}
+
+				_suggestionPreviewChanging = false;				
+				//if (StyleModel.IsAutoCompleteOn)
+					SetSuggestionPreview();
 			}
 			finally { _suggestionPreviewChanging = false; _deletingText = false; }
 		}
 
-		private void DataContext_Refreshed()
+		protected virtual void DataContext_Refreshed()
 		{
 			SetTargetTextBoxTextToSuggestionString();
 
@@ -288,7 +316,8 @@ namespace KOControls.GUI
 					if(!_suggestionPreviewChanging)
 					{
 						_selector.SelectedItem = DataContext.SuggestionPreview;
-						SetTargetTextBoxTextToSuggestionPreviewString();
+						if (!_deletingText)
+							SetTargetTextBoxTextToSuggestionPreviewString();
 					}
 				}
 				else if(args.Property == AutoSuggestViewModel.SuggestionProperty && DataContext.IsConfirmed)
@@ -309,24 +338,35 @@ namespace KOControls.GUI
 			_changingTexBoxText = true;
 			try
 			{
-				var fullText = DataContext.SuggestionPreviewString ?? "";
+				var fullText = DataContext.SuggestionPreviewToString(DataContext.SuggestionPreview) ?? "";
 				var text = TargetTextBoxTextWithoutTrailingSelection;
-				if(fullText.StartsWith(text, StringComparison.CurrentCultureIgnoreCase))
+				if (StyleModel.IsAutoCompleteOn)
 				{
-					TargetTextBox.Text = fullText;
-					TargetTextBox.CaretIndex = text.Length;
-					TargetTextBox.Select(text.Length, fullText.Length);
+					if(fullText.StartsWith(text, StringComparison.CurrentCultureIgnoreCase))
+					{
+						TargetTextBox.Text = fullText;
+						TargetTextBox.CaretIndex = text.Length;
+						TargetTextBox.Select(text.Length, fullText.Length);
+					}
+				}
+				else
+				{
+					if (DataContext.SuggestionPreview != null)
+					{
+						TargetTextBox.Text = fullText;
+						TargetTextBox.CaretIndex = fullText.Length;
+					}
 				}
 			}
 			finally { _changingTexBoxText = false; }
 		}
 
-		private void SetTargetTextBoxTextToSuggestionString()
+		protected virtual void SetTargetTextBoxTextToSuggestionString()
 		{
-			TargetTextBox.Text = DataContext.SuggestionString;
+			TargetTextBox.Text = DataContext.SuggestionToString(DataContext.Suggestion);
 		}
 
-		private bool _dataContextPropertyChanging;
+		protected bool _dataContextPropertyChanging;
 
 		private bool _userInput;
 
@@ -368,12 +408,17 @@ namespace KOControls.GUI
 				{
 					DataContext.SuggestionPreview = _selector.SelectedItem;
 				}
-				SetTargetTextBoxTextToSuggestionPreviewString();
-				Dispatcher.BeginInvoke((Action)delegate
+				if (!_deletingText)
+					SetTargetTextBoxTextToSuggestionPreviewString();
+				
+				if (StyleModel.IsAutoCompleteOn)
 				{
-					if(IsKeyBoardFocusWithinAutoSuggestControls)
-						TargetTextBox.Focus();
-				});
+					Dispatcher.BeginInvoke((Action)delegate
+					{
+						if (IsKeyBoardFocusWithinAutoSuggestControls)
+							TargetTextBox.Focus();
+					});
+				}
 			}
 			finally { _suggestionPreviewChanging = false; }
 		}
@@ -393,6 +438,9 @@ namespace KOControls.GUI
 			{
 				_deletingText = e.Changes.First().AddedLength == 0 && e.Changes.First().RemovedLength > 0;
 				ApplyFilterAndShowSuggestions();
+
+				if(StyleModel.IsFilterTextDisplayed && _searchCriteria != null)
+					_searchCriteria.Content = TargetTextBoxText;
 			}
 			finally { _userInput = false; }
 		}
@@ -402,7 +450,7 @@ namespace KOControls.GUI
 			_userInput = true;
 		}
 
-		private void HandleKeyDown(object sender, KeyEventArgs e)
+		protected virtual void HandleKeyDown(object sender, KeyEventArgs e)
 		{
 			if(sender == TargetTextBox)
 			{
@@ -430,8 +478,9 @@ namespace KOControls.GUI
 			{
 				case Key.Enter:
 					{
+						//if((InvokeSelectTrigger & InvokeSelectTriggers.Enter) == InvokeSelectTriggers.Enter)
 						HandleConfirm();
-						if((TaboutTrigger & TaboutTriggers.Enter) == TaboutTriggers.Enter)
+						if((StyleModel.TaboutTrigger & TaboutTriggers.Enter) == TaboutTriggers.Enter)
 							TabOutNext();
 						e.Handled = true;
 						break;
@@ -440,12 +489,12 @@ namespace KOControls.GUI
 					{
 						if(TargetTextBox.CaretIndex == 0)
 						{
-							if((ConfirmTrigger & ConfirmTriggers.Arrows) == ConfirmTriggers.Arrows)
+							if((StyleModel.ConfirmTrigger & ConfirmTriggers.Arrows) == ConfirmTriggers.Arrows)
 							{
 								HandleConfirm();
 								e.Handled = true;
 							}
-							if((TaboutTrigger & TaboutTriggers.Arrows) == TaboutTriggers.Arrows)
+							if((StyleModel.TaboutTrigger & TaboutTriggers.Arrows) == TaboutTriggers.Arrows)
 							{
 								TabOutPrevious();
 								e.Handled = true;
@@ -457,12 +506,12 @@ namespace KOControls.GUI
 					{
 						if(TargetTextBox.CaretIndex == TargetTextBoxTextWithoutTrailingSelection.Length)
 						{
-							if((ConfirmTrigger & ConfirmTriggers.Arrows) == ConfirmTriggers.Arrows)
+							if((StyleModel.ConfirmTrigger & ConfirmTriggers.Arrows) == ConfirmTriggers.Arrows)
 							{
 								HandleConfirm();
 								e.Handled = true;
 							}
-							if((TaboutTrigger & TaboutTriggers.Arrows) == TaboutTriggers.Arrows)
+							if((StyleModel.TaboutTrigger & TaboutTriggers.Arrows) == TaboutTriggers.Arrows)
 							{
 								TabOutNext();
 								e.Handled = true;
@@ -474,12 +523,12 @@ namespace KOControls.GUI
 					{
 						if(DataContext.Suggestions.Count() == 1 && !DataContext.IsFreeTextAllowed && DataContext.SuggestionPreview != null)
 						{
-							if((ConfirmTrigger & ConfirmTriggers.Space) == ConfirmTriggers.Space)
+							if((StyleModel.ConfirmTrigger & ConfirmTriggers.Space) == ConfirmTriggers.Space)
 							{
 								HandleConfirm();
 								e.Handled = true;
 							}
-							if((TaboutTrigger & TaboutTriggers.Space) == TaboutTriggers.Space)
+							if((StyleModel.TaboutTrigger & TaboutTriggers.Space) == TaboutTriggers.Space)
 							{
 								TabOutNext();
 								e.Handled = true;
@@ -489,7 +538,7 @@ namespace KOControls.GUI
 					}
 				case Key.Tab:
 					{
-						if((ConfirmTrigger & ConfirmTriggers.Tab) == ConfirmTriggers.Tab)
+						if((StyleModel.ConfirmTrigger & ConfirmTriggers.Tab) == ConfirmTriggers.Tab)
 						{
 							HandleConfirm();
 							e.Handled = true;
@@ -520,15 +569,16 @@ namespace KOControls.GUI
 		{
 			_userInput = false;
 		}
-		private void HandleGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+		protected virtual void HandleGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
 			if(_dataContextPropertyChanging || (OwnerPopup != null && OwnerPopup.IsOpen)) return;
 
-			WireUpEvents(this);
+			this.WireUpEvents();
 			TargetTextBox.Select(TargetTextBoxText.Length, 0);
 			ApplyFilterAndShowSuggestions();
 			Dispatcher.BeginInvoke((Action)SelectAll);
 		}
+
 		private void HandleLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
 		{
 			if(IsKeyBoardFocusWithinAutoSuggestControls)
@@ -560,13 +610,13 @@ namespace KOControls.GUI
 			CloseOwnerPopup();
 		}
 
-		private void SelectAll()
+		protected void SelectAll()
 		{
 			TargetTextBox.CaretIndex = TargetTextBoxTextWithoutTrailingSelection.Length;
 			TargetTextBox.SelectAll();
 		}
 
-		private string TargetTextBoxText
+		protected string TargetTextBoxText
 		{
 			get
 			{

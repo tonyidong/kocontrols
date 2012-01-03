@@ -29,10 +29,7 @@
 			<GUI:AutoSuggestControl x:Name="autoSuggest" Focusable="False" 
 				OwnerPopup="{Binding ElementName=_popup}"
 				TargetTextBox="{Binding ElementName=_cityTextBox, Mode=OneTime}"
-				FrameworkElement.DataContext="{Binding AutoSuggestVM}"
-				TaboutTrigger="All" 
-				ConfirmTrigger="SpaceTabArrows">
-
+				FrameworkElement.DataContext="{Binding AutoSuggestVM}">
 				<GUI:AutoSuggestControl.SuggestionsTemplate>
 					<ControlTemplate>
 						<DataGrid x:Name="PART_Selector"
@@ -51,17 +48,23 @@
 
 		<StackPanel Grid.Column="2" Grid.RowSpan="2">
 			<CheckBox x:Name="_isFreeTextAllowedCheckBox" Margin="5"
-				Content="Allow invalid values" IsChecked="{Binding AutoSuggestVM.IsFreeTextAllowed}"/>
+				Content="Allow invalid value" IsChecked="{Binding AutoSuggestVM.IsFreeTextAllowed}"/>
 			<CheckBox Margin="5"
 				Content="Allow empty value" IsChecked="{Binding AutoSuggestVM.IsEmptyValueAllowed}"/>
 			<CheckBox Margin="5"
-				Content="Allow invoke edit window" IsChecked="{Binding IsInvokeEditAllowed}"/>
+				Content="Set AutoComplete to on" IsChecked="{Binding AutoSuggestVM.StyleModel.IsAutoCompleteOn}"/>
 			<CheckBox Margin="5"
-				Content="Allow invoke new window" IsChecked="{Binding IsInvokeNewAllowed}"/>
+				Content="Search by City and Country" IsChecked="{Binding IsFilterByCountryCity}"/>
+			<CheckBox Margin="5"
+				Content="Display filter text" IsChecked="{Binding AutoSuggestVM.StyleModel.IsFilterTextDisplayed}"/>
 			<StackPanel Orientation="Horizontal">
 				<Label Content="Delay (millisec.):" />
 				<TextBox Text="{Binding Delay, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="50" />
 			</StackPanel>
+			<CheckBox Margin="5"
+				Content="Show City 'Edit' button" IsChecked="{Binding IsInvokeEditAllowed}"/>
+			<CheckBox Margin="5"
+				Content="Show City 'New' button" IsChecked="{Binding IsInvokeNewAllowed}"/>
 			<Button Margin="5" Width="150" HorizontalAlignment="Left"
 				Click="Button_Click">Select Kotel City</Button>
 		</StackPanel>

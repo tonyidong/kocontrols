@@ -39,6 +39,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoSuggestBaseViewModel.cs" />
+    <Compile Include="AutoSuggestControlStyleViewModel.cs" />
     <Compile Include="AutoSuggestViewModel.cs" />
     <Compile Include="Popup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

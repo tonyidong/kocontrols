@@ -10,6 +10,7 @@ namespace KOControls.Samples.Core
 		public CityEditWindow()
 		{
 			InitializeComponent();
+			this.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 		}
 
 		public CityEditWindow(CityEditVM vm)

@@ -54,6 +54,12 @@ namespace KOControls.Core
 			property.AddOwner(typeof(OWNER), new FrameworkPropertyMetadata(defaultValue ?? property.DefaultMetadata.DefaultValue, valueChanged, coerceValue));
 		}
 
+		public static DependencyProperty RegisterAttachedProperty<TYPE, OWNER>(string name, TYPE defaultValue=default(TYPE), PropertyChangedCallback valueChanged=null, CoerceValueCallback coerceValue=null)
+			where OWNER : DependencyObject
+		{
+			return DependencyProperty.RegisterAttached(name, typeof(TYPE), typeof(OWNER), new FrameworkPropertyMetadata(defaultValue, valueChanged, coerceValue));
+		}
+
 		public object GetValue(DependencyPropertyKey property) { return GetValue(property.DependencyProperty); }
 
 		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs args)
