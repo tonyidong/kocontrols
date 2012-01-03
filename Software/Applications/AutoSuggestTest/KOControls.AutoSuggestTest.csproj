@@ -55,9 +55,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AutoSuggestTextBoxTestDataGrid.xaml.cs">
+      <DependentUpon>AutoSuggestTextBoxTestDataGrid.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AutoSuggestTextBox\AutoSuggestConsumerViewModel.cs" />
     <Compile Include="AutoSuggestTextBox\AutoSuggestConsumerViewModelBase.cs" />
+    <Compile Include="CitiesViewModel.cs" />
     <Compile Include="TestAppViewModel.cs" />
+    <Page Include="AutoSuggestTextBoxTestDataGrid.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="AutoSuggestTextBox\AutoSuggestTextBoxTest.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -119,6 +127,9 @@
       <Project>{4306F647-BB23-4236-B936-17EBBD35728D}</Project>
       <Name>KOControls.Samples.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

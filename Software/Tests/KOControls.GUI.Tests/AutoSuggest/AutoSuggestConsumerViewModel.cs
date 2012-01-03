@@ -16,6 +16,7 @@ namespace KOControls.GUI.Tests.AutoSuggest
 		public AutoSuggestConsumerViewModel()
 			: base(new AutoSuggestViewModel.DefaultSelector(new ValueConverter(x => x == null ? "" : ((City)x).Name),TestDataService.GetCities()), new ValueConverter(x => x == null ? "" : ((City)x).Name))
 		{
+
 		}
 
 		public int SuggestionsCount

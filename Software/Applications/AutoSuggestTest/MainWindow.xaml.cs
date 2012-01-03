@@ -11,6 +11,8 @@ namespace ControlTestApp
 
 			var vm = new TestAppViewModel();
 			vm.AutoSuggestConsumerViewModel = new AutoSuggestConsumerViewModel();
+	
+			vm.CitiesViewModel = new CitiesViewModel();
 
 			DataContext = vm;
 		}

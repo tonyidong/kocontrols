@@ -26,7 +26,7 @@ namespace KOControls.Samples.Core.Services
 		{
 			List<City> cities = new List<City>();
 			cities.Add(new City() { Key = City.GetNextKey(), Country = Bulgaria, Name = "Kostenec" });
-			cities.Add(new City() { Key = City.GetNextKey(), Country = Bulgaria, Name = "Kostin Brod" });
+			cities.Add(new City() { Key = City.GetNextKey(), Country = Bulgaria, Name = "Kostinbrod" });
 			cities.Add(new City() { Key = City.GetNextKey(), Country = Bulgaria, Name = "Kotel" });
 			cities.Add(new City() { Key = City.GetNextKey(), Country = Bulgaria, Name = "Kustendil" });
 

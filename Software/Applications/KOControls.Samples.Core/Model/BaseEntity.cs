@@ -5,7 +5,7 @@ using KOControls.Core;
 
 namespace KOControls.Samples.Core.Model
 {
-	public class BaseEntity : ViewModel, INotifyPropertyChanged
+	public class BaseEntity : INotifyPropertyChanged
 	{
 		private static IDictionary<string, int> Keys = new Dictionary<string, int>();
 

@@ -41,15 +41,18 @@
 			>
 			<Grid>
 				<Grid.RowDefinitions>
+					<RowDefinition x:Name="_searchCriteriaRow" Height="Auto"></RowDefinition>
 					<RowDefinition Height="*"></RowDefinition>
 					<RowDefinition Height="Auto"></RowDefinition>
 				</Grid.RowDefinitions>
 
-				<Control x:Name="_suggestionsContentPresenter" Grid.Row="0"
+				<Label x:Name="PART_SearchCriteria" Height="0" Grid.Row="0"/>
+		
+				<Control x:Name="_suggestionsContentPresenter" Grid.Row="1"
 						 Template="{TemplateBinding SuggestionsTemplate}"
 						 DataContext="{Binding Suggestions}"/>
 
-				<Control x:Name="_commandsContentPresenter" Grid.Row="1"
+				<Control x:Name="_commandsContentPresenter" Grid.Row="2"
 						 Template="{TemplateBinding CommandsTemplate}"
 						 DataContext="{Binding Commands}"/>
 			</Grid>

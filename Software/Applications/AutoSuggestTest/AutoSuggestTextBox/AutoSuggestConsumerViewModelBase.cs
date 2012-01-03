@@ -9,17 +9,22 @@ using KOControls.Core;
 using KOControls.Samples.Core.Services;
 using System.Windows.Data;
 
-namespace ControlTestApp.AutoSuggestTextBox
+namespace ControlTestApp
 {
 	public abstract class AutoSuggestConsumerViewModelBase : DependencyObject
 	{
+		public static IValueConverter CitySuggestionToStringValueConverter = new ValueConverter(x => x == null ? "" : ((City)x).Name);
+		protected AutoSuggestControlStyleViewModel styleModel = null;
 		protected AutoSuggestConsumerViewModelBase()
 		{
 			AllCities = TestDataService.GetCities();
 
-			IValueConverter valueConverter = new ValueConverter(x => x == null ? "" : ((City)x).Name);
-			ISelector selector = new AutoSuggestViewModel.DefaultSelector(valueConverter, AllCities);
-			AutoSuggestVM = new AutoSuggestViewModel(selector, valueConverter);
+			styleModel = new AutoSuggestControlStyleViewModel();
+			styleModel.ConfirmTrigger = ConfirmTriggers.SpaceTabArrows;
+			styleModel.TaboutTrigger = TaboutTriggers.All;
+
+			ISelector selector = new AutoSuggestViewModel.DefaultSelector(CitySuggestionToStringValueConverter, AllCities);
+			AutoSuggestVM = new AutoSuggestViewModel(selector, CitySuggestionToStringValueConverter, CitySuggestionToStringValueConverter, styleModel);
 
 			AutoSuggestVM.FreeTextToSuggestionConverter = FreeTextToSuggestionConverter;
 			EditCommand = new Command(x => InvokeEdit(), null, "Edit");
