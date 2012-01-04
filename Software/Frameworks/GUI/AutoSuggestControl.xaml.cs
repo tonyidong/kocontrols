@@ -538,13 +538,10 @@ namespace KOControls.GUI
 					}
 				case Key.Tab:
 					{
-						if((StyleModel.ConfirmTrigger & ConfirmTriggers.Tab) == ConfirmTriggers.Tab)
+						if ((StyleModel.ConfirmTrigger & ConfirmTriggers.Tab) == ConfirmTriggers.Tab)
 						{
 							HandleConfirm();
-							e.Handled = true;
 						}
-						TargetTextBox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-						e.Handled = true;
 						break;
 					}
 				case Key.Escape:
