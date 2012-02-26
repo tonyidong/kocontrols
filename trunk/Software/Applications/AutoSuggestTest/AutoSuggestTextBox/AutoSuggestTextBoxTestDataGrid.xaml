@@ -50,15 +50,14 @@
 									<ColumnDefinition MinWidth="100" Width="*"/>
 									<ColumnDefinition MinWidth="100" Width="Auto" />
 								</Grid.ColumnDefinitions>
-								<TextBox Width="140" Height="22" Grid.Row="0" Grid.Column="0" Padding="0, 3, 0, 0" VerticalAlignment="Top"
-			x:Name="_cityTextBox"/>
+								<TextBox x:Name="_cityTextBox" Width="140" Height="22" Grid.Row="0" Grid.Column="0" Padding="0, 3, 0, 0" VerticalAlignment="Top"/>
 
 								<GUI:Popup x:Name="_popup" Placement="Bottom" PlacementTarget="{Binding ElementName=_cityTextBox}">
 									<GUI:AutoSuggestControl x:Name="autoSuggest" Focusable="False" 
 										OwnerPopup="{Binding ElementName=_popup}"
 										TargetTextBox="{Binding ElementName=_cityTextBox, Mode=OneTime}"
 										FrameworkElement.DataContext="{Binding DataContext.AutoSuggestVM, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ControlTestApp:AutoSuggestTextBoxTestDataGrid}}}"
->
+										>
 										<GUI:AutoSuggestControl.SuggestionsTemplate>
 											<ControlTemplate>
 												<DataGrid x:Name="PART_Selector"

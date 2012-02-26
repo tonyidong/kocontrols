@@ -22,7 +22,10 @@ namespace KOControls.Samples.Core.Services
 			return countries;
 		}
 
-		public static IList<City> GetCities()
+		private static IList<City> _allCities;
+		public static IList<City> AllCities { get {if(_allCities == null) { _allCities = GetCities(); } return _allCities;}}
+
+		public static List<City> GetCities()
 		{
 			List<City> cities = new List<City>();
 			cities.Add(new City() { Key = City.GetNextKey(), Country = Bulgaria, Name = "Kostenec" });

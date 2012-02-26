@@ -34,25 +34,30 @@ namespace KOControls.GUI
 			if(_window != null)
 			{
 				_window.PreviewKeyDown -= Window_PreviewKeyDown;
-				_window.Deactivated -= window_Deactivated;
+				_window.Deactivated -= Window_Deactivated;
+				_window.LocationChanged -= Window_LocationChanged;
 			}
 		}
 		private void WindowAttachEvents()
 		{
-			//Fixed bug from Microsoft (Window.GetWindow can return null) :-)
-			if(_window != null)
-			{
-				_window.PreviewKeyDown -= Window_PreviewKeyDown;
-				_window.Deactivated -= window_Deactivated;
-			}
+			WindowDetachEvents();
+		
 			_window = Window.GetWindow(this);
 			if(_window != null)
 			{
 				_window.PreviewKeyDown += Window_PreviewKeyDown;
-				_window.Deactivated += window_Deactivated;
+				_window.Deactivated += Window_Deactivated;
+				_window.LocationChanged += Window_LocationChanged;
 			}
 		}
-		private void window_Deactivated(object sender, EventArgs e)
+
+		private void Window_LocationChanged(object sender, EventArgs e)
+		{
+			HorizontalOffset += 0.01;
+			HorizontalOffset -= 0.01;
+		}
+
+		private void Window_Deactivated(object sender, EventArgs e)
 		{
 			IsOpen = false;
 		}

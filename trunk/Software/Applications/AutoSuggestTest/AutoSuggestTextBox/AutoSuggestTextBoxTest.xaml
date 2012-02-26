@@ -33,8 +33,7 @@
 				<GUI:AutoSuggestControl.SuggestionsTemplate>
 					<ControlTemplate>
 						<DataGrid x:Name="PART_Selector"
-								  CanUserReorderColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="True"
-								   AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="None">
+								 CanUserReorderColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="True" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="None">
 							<DataGrid.Columns>
 								<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
 								<DataGridTextColumn Header="Country Name" Binding="{Binding Country.Name}" />
@@ -45,6 +44,8 @@
 
 			</GUI:AutoSuggestControl>
 		</GUI:Popup>
+
+	
 
 		<StackPanel Grid.Column="2" Grid.RowSpan="2">
 			<CheckBox x:Name="_isFreeTextAllowedCheckBox" Margin="5"

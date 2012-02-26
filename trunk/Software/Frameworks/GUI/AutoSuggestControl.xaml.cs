@@ -6,7 +6,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using KOControls.Core;
 using KOControls.GUI.Core;
-using System.Diagnostics;
 
 namespace KOControls.GUI
 {
@@ -61,17 +60,19 @@ namespace KOControls.GUI
 	{
 		#region Construction
 		protected static readonly ResourceDictionary ResourceDictionary = new ResourceDictionary { Source = new Uri("pack://application:,,,/KOControls.GUI;component/AutoSuggestControl.xaml") };
+		private static readonly Style Default_Style;
 		private static readonly ControlTemplate Default_Template;
 		private static readonly ControlTemplate Default_CommandsTemplate;
 		private static readonly ControlTemplate Default_SuggestionsTemplate;
 
 		static AutoSuggestControl()
 		{
-			Default_Template = (ControlTemplate)ResourceDictionary["AutoSuggestControl_DefaultTemplate"];
+			Default_Style = (Style)ResourceDictionary["AutoSuggestControl_Default_Style"];
+			Default_Template = (ControlTemplate)ResourceDictionary["AutoSuggestControl_Default_Template"];
 			Default_CommandsTemplate = (ControlTemplate)ResourceDictionary["AutoSuggestControl_Default_CommandsTemplate"];
 			Default_SuggestionsTemplate = (ControlTemplate)ResourceDictionary["AutoSuggestControl_Default_SuggestionsTemplate"];
 
-			ViewModel.OverrideProperty<AutoSuggestControl>(FrameworkElement.DataContextProperty, null, Dependents_Changed, (d, v) => { Dependents_Changing(d, v);  return v as AutoSuggestViewModel; });
+			ViewModel.OverrideProperty<AutoSuggestControl>(FrameworkElement.DataContextProperty, null, Dependents_Changed, (d, v) => { Dependents_Changing(d, v); return v as AutoSuggestViewModel; });
 			ViewModel.OverrideProperty<AutoSuggestControl>(TemplateProperty, Default_Template, Dependents_Changed, (d, v) => { Dependents_Changing(d, v); return v; });
 
 			DataContextProperty = ViewModel.IsInDesignMode ? ViewModel.RegisterProperty<AutoSuggestControl, AutoSuggestViewModel>("DataContext") : FrameworkElement.DataContextProperty;
@@ -79,6 +80,8 @@ namespace KOControls.GUI
 
 		public AutoSuggestControl()
 		{
+			Style = Default_Style;
+
 			Loaded += OnLoaded;
 			//TBD: This line below is going to brake changes in CommandsTemplate in datagrid templated column!!!!
 			CommandsTemplate = Default_CommandsTemplate;
@@ -118,8 +121,8 @@ namespace KOControls.GUI
 		#endregion
 
 		#region StyleModel
-		private AutoSuggestControlStyleViewModel StyleModel { get { if (DataContext != null) return DataContext.StyleModel as AutoSuggestControlStyleViewModel; else return null; } }
-		#endregion 
+		private AutoSuggestControlStyleViewModel StyleModel { get { return DataContext.StyleModel as AutoSuggestControlStyleViewModel; } }
+		#endregion
 
 		#region TargetTextBox
 		public static readonly DependencyProperty TargetTextBoxProperty = ViewModel.RegisterProperty<TextBox, AutoSuggestControl>("TargetTextBox", null, Dependents_Changed, Dependents_Changing);
@@ -149,11 +152,6 @@ namespace KOControls.GUI
 		#endregion
 
 		protected bool _initialized;
-		private static object Dependents_Changing2(DependencyObject d, object v)
-		{
-			return Dependents_Changing(d, v);
-		}
-
 		private static object Dependents_Changing(DependencyObject d, object v)
 		{
 			var asc = (AutoSuggestControl)d;
@@ -165,7 +163,7 @@ namespace KOControls.GUI
 
 			return v;
 		}
-		
+
 		protected static void Dependents_Changed(DependencyObject d, DependencyPropertyChangedEventArgs a)
 		{
 			var asc = (AutoSuggestControl)d;
@@ -177,7 +175,7 @@ namespace KOControls.GUI
 			asc._suggestionsContentPresenter.ApplyTemplate();
 			asc._selector = (Selector)asc._suggestionsContentPresenter.Template.FindName("PART_Selector", asc._suggestionsContentPresenter);
 			asc._searchCriteria = asc.Template.FindName("PART_SearchCriteria", asc) as Label;
-			 
+
 			asc._commandsContentPresenter	 = (Control)asc.Template.FindName("_commandsContentPresenter", asc);
 			asc._commandsContentPresenter.Template = asc.CommandsTemplate;
 			asc._commandsContentPresenter.ApplyTemplate();
@@ -193,8 +191,7 @@ namespace KOControls.GUI
 				DataContext.Refreshed -= DataContext_Refreshed;
 				DataContext.PropertyChanged -= DataContext_PropertyChanged;
 				DataContext.FilterApplied -= DataContext_FilterApplied;
-				if(StyleModel != null)
-					StyleModel.RemoveValueChanged(AutoSuggestControlStyleViewModel.IsFilterTextDisplayedProperty, IsShowFilterTextInControlChanged);
+				StyleModel.RemoveValueChanged(AutoSuggestControlStyleViewModel.IsFilterTextDisplayedProperty, IsShowFilterTextInControlChanged);
 			}
 			if(_selector != null)
 			{
@@ -216,19 +213,6 @@ namespace KOControls.GUI
 			}
 		}
 
-		private void IsShowFilterTextInControlChanged(object sender, EventArgs args)
-		{
-			if (_searchCriteria != null)
-			{
-				if (StyleModel.IsFilterTextDisplayed)
-					_searchCriteria.Height = 25;
-				else
-					_searchCriteria.Height = 0;
-
-				_searchCriteria.Content = TargetTextBoxText;
-			}
-		}
-
 		protected virtual void WireUpEvents()
 		{
 			ClearEvents();
@@ -236,14 +220,14 @@ namespace KOControls.GUI
 			DataContext.Refreshed += DataContext_Refreshed;
 			DataContext.PropertyChanged += DataContext_PropertyChanged;
 			DataContext.FilterApplied += DataContext_FilterApplied;
-			StyleModel.AddValueChanged(AutoSuggestControlStyleViewModel.IsFilterTextDisplayedProperty,IsShowFilterTextInControlChanged);
+			StyleModel.AddValueChanged(AutoSuggestControlStyleViewModel.IsFilterTextDisplayedProperty, IsShowFilterTextInControlChanged);
 
 			_selector.SelectionChanged += Selector_SelectionChanged;
-			_selector.AddHandler(Control.MouseDoubleClickEvent, (RoutedEventHandler)Selector_MouseDoubleClick, true);
+			_selector.AddHandler(MouseDoubleClickEvent, (RoutedEventHandler)Selector_MouseDoubleClick, true);
 			_selector.PreviewKeyDown += HandleKeyDown;
 			_selector.PreviewKeyUp += HandleKeyUp;
 			_selector.LostKeyboardFocus += HandleLostKeyboardFocus;
-
+			
 			TargetTextBox.PreviewTextInput += TargetTextBox_TextInput;
 			TargetTextBox.TextChanged += TargetTextBox_TextChanged;
 			TargetTextBox.PreviewKeyDown += HandleKeyDown;
@@ -252,6 +236,15 @@ namespace KOControls.GUI
 			TargetTextBox.LostKeyboardFocus += HandleLostKeyboardFocus;
 
 			SetTargetTextBoxTextToSuggestionString();
+		}
+
+		private void IsShowFilterTextInControlChanged(object sender, EventArgs args)
+		{
+			if (_searchCriteria == null) return;
+
+			_searchCriteria.Height = StyleModel.IsFilterTextDisplayed ? 25 : 0;
+
+			_searchCriteria.Content = TargetTextBoxText;
 		}
 
 		private void ApplyFilterAndShowSuggestions()
@@ -287,9 +280,9 @@ namespace KOControls.GUI
 					}
 				}
 
-				_suggestionPreviewChanging = false;				
+				_suggestionPreviewChanging = false;
 				//if (StyleModel.IsAutoCompleteOn)
-					SetSuggestionPreview();
+				SetSuggestionPreview();
 			}
 			finally { _suggestionPreviewChanging = false; _deletingText = false; }
 		}
@@ -316,7 +309,7 @@ namespace KOControls.GUI
 					if(!_suggestionPreviewChanging)
 					{
 						_selector.SelectedItem = DataContext.SuggestionPreview;
-						if (!_deletingText)
+						if(!_deletingText)
 							SetTargetTextBoxTextToSuggestionPreviewString();
 					}
 				}
@@ -328,7 +321,7 @@ namespace KOControls.GUI
 			}
 			finally { _dataContextPropertyChanging = false; }
 		}
-
+		
 		private bool _changingTexBoxText = false;
 
 		private void SetTargetTextBoxTextToSuggestionPreviewString()
@@ -340,7 +333,7 @@ namespace KOControls.GUI
 			{
 				var fullText = DataContext.SuggestionPreviewToString(DataContext.SuggestionPreview) ?? "";
 				var text = TargetTextBoxTextWithoutTrailingSelection;
-				if (StyleModel.IsAutoCompleteOn)
+				if(StyleModel.IsAutoCompleteOn)
 				{
 					if(fullText.StartsWith(text, StringComparison.CurrentCultureIgnoreCase))
 					{
@@ -351,7 +344,7 @@ namespace KOControls.GUI
 				}
 				else
 				{
-					if (DataContext.SuggestionPreview != null)
+					if(DataContext.SuggestionPreview != null)
 					{
 						TargetTextBox.Text = fullText;
 						TargetTextBox.CaretIndex = fullText.Length;
@@ -408,14 +401,14 @@ namespace KOControls.GUI
 				{
 					DataContext.SuggestionPreview = _selector.SelectedItem;
 				}
-				if (!_deletingText)
+				if(!_deletingText)
 					SetTargetTextBoxTextToSuggestionPreviewString();
-				
-				if (StyleModel.IsAutoCompleteOn)
+
+				if(StyleModel.IsAutoCompleteOn)
 				{
 					Dispatcher.BeginInvoke((Action)delegate
 					{
-						if (IsKeyBoardFocusWithinAutoSuggestControls)
+						if(IsKeyBoardFocusWithinAutoSuggestControls)
 							TargetTextBox.Focus();
 					});
 				}
@@ -538,7 +531,7 @@ namespace KOControls.GUI
 					}
 				case Key.Tab:
 					{
-						if ((StyleModel.ConfirmTrigger & ConfirmTriggers.Tab) == ConfirmTriggers.Tab)
+						if((StyleModel.ConfirmTrigger & ConfirmTriggers.Tab) == ConfirmTriggers.Tab)
 						{
 							HandleConfirm();
 						}
@@ -586,12 +579,13 @@ namespace KOControls.GUI
 
 		private void HandleConfirm()
 		{
-			if (_confirming) return;
+			if(_confirming) return;
 			_confirming = true;
 
 			try
 			{
-				if (!DataContext.IsConfirmed) DataContext.Confirm(TargetTextBoxText);
+				if(!DataContext.IsConfirmed || (DataContext.IsFreeTextAllowed && String.Compare(DataContext.SuggestionToString(DataContext.Suggestion), TargetTextBoxText, true) != 0) ) 
+					DataContext.Confirm(TargetTextBoxText);
 
 				SetTargetTextBoxTextToSuggestionString();//If it is confirmed make sure that the displayed text matches the suggestion.
 				CloseOwnerPopup();

@@ -4,12 +4,14 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" mc:Ignorable="d"
 	xmlns:GUI="clr-namespace:KOControls.GUI"
-	xmlns:Core="clr-namespace:KOControls.GUI.Core;assembly=KOControls.GUI.Core">
-
+	>
+	
 	<!--AutoSuggestControl_Default_SuggestionsTemplate-->
 	<ControlTemplate x:Key="AutoSuggestControl_Default_SuggestionsTemplate">
-		<DataGrid x:Name="PART_Selector" ItemsSource="{Binding Suggestions}" SelectionMode="Single">
-		</DataGrid>
+		<DataGrid x:Name="PART_Selector" SelectionMode="Single" AutoGenerateColumns="True" IsReadOnly="True" HeadersVisibility="None" EnableRowVirtualization="True"
+				  ItemsSource="{Binding Suggestions}"
+				  MinWidth="{Binding TargetTextBox.ActualWidth, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestControl}}"
+				  />
 	</ControlTemplate>
 
 	<!--AutoSuggestControl_Default_CommandsTemplate-->
@@ -32,8 +34,8 @@
 		</ItemsControl>
 	</ControlTemplate>
 
-	<!--AutoSuggestControl_DefaultTemplate-->
-	<ControlTemplate x:Key="AutoSuggestControl_DefaultTemplate" TargetType="{x:Type GUI:AutoSuggestControl}">
+	<!--AutoSuggestControl_Default_Template-->
+	<ControlTemplate x:Key="AutoSuggestControl_Default_Template" TargetType="{x:Type GUI:AutoSuggestControl}">
 		<Border
 			Background="{TemplateBinding Background}"
 			BorderBrush="{TemplateBinding BorderBrush}"
@@ -58,4 +60,8 @@
 			</Grid>
 		</Border>
 	</ControlTemplate>
+	
+	<Style x:Key="AutoSuggestControl_Default_Style" TargetType="GUI:AutoSuggestControl">
+		<Setter Property="SuggestionsTemplate" Value="{StaticResource AutoSuggestControl_Default_SuggestionsTemplate}"></Setter>
+	</Style>
 </ResourceDictionary>

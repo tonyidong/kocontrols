@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using KOControls.Core;
 using System.Windows;
 
@@ -9,6 +6,19 @@ namespace KOControls.GUI
 {
 	public class AutoSuggestControlStyleViewModel : ViewModel
 	{
+		public static AutoSuggestControlStyleViewModel CreateDefaultInstance() { return new AutoSuggestControlStyleViewModel(TaboutTriggers.All, ConfirmTriggers.SpaceTabArrows); }
+
+		#region Constructors
+		public AutoSuggestControlStyleViewModel()
+		{
+		}
+		public AutoSuggestControlStyleViewModel(TaboutTriggers taboutTrigger, ConfirmTriggers confirmTrigger)
+		{
+			this.TaboutTrigger = taboutTrigger;
+			this.ConfirmTrigger = confirmTrigger;
+		}
+		#endregion 
+
 		#region IsAutoCompleteOn
 		public static readonly DependencyProperty IsAutoCompleteOnProperty = ViewModel.RegisterProperty<bool, AutoSuggestControlStyleViewModel>("IsAutoCompleteOn", true);
 		public bool IsAutoCompleteOn { get { return (bool)GetValue(IsAutoCompleteOnProperty); } set { SetValue(IsAutoCompleteOnProperty, value); } }
