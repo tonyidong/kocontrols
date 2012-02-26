@@ -11,3 +11,6 @@
 
 	Also under <runtime> paste the following:
 		<loadFromRemoteSources enabled="true" />
+Or for newer NUnit editions comment out the line:
+	<supportedRuntime version="v2.0.50727" />-->
+  

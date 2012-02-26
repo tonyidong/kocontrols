@@ -4,11 +4,11 @@ namespace KOControls.Samples.Core.Model
 {
 	public class City : BaseEntity
 	{
-		private string name = "";
-		private Country country = null;
-
 		public string Name { get { return name; } set { if(name != value) { name = value; OnPropertyChanged("Name"); } } }
+		private string name = "";
+
 		public Country Country { get { return country; } set { if(country != value) { country = value; OnPropertyChanged("Country"); } } }
+		private Country country = null;
 
 		public bool IsValid
 		{

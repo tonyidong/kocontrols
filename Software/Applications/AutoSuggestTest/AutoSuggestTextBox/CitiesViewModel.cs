@@ -34,10 +34,8 @@ namespace ControlTestApp
 		#endregion
 
 		public CitiesViewModel()
-			: base()
 		{			
 			CityCountries = new ObservableCollection<CityCountry>();
-			AutoSuggestVM.IsEmptyValueAllowed = true;
 
 			AutoSuggestVM.AddValueChanged(AutoSuggestViewModel.SuggestionProperty, delegate
 			{

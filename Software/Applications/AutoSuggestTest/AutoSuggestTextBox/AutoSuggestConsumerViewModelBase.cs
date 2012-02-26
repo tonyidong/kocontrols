@@ -19,10 +19,7 @@ namespace ControlTestApp
 		{
 			AllCities = TestDataService.GetCities();
 
-			styleModel = new AutoSuggestControlStyleViewModel();
-			styleModel.ConfirmTrigger = ConfirmTriggers.SpaceTabArrows;
-			styleModel.TaboutTrigger = TaboutTriggers.All;
-
+			styleModel = AutoSuggestControlStyleViewModel.CreateDefaultInstance();
 			ISelector selector = new AutoSuggestViewModel.DefaultSelector(CitySuggestionToStringValueConverter, AllCities);
 			AutoSuggestVM = new AutoSuggestViewModel(selector, CitySuggestionToStringValueConverter, CitySuggestionToStringValueConverter, styleModel);
 
@@ -98,7 +95,7 @@ namespace ControlTestApp
 
 		public AutoSuggestViewModel AutoSuggestVM { get; protected set; }
 
-		public IList<City> AllCities { get; set; }
+		public List<City> AllCities { get; set; }
 
 		public void InvokeEdit()
 		{

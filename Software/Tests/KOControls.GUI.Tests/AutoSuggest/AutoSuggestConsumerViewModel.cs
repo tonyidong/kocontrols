@@ -14,7 +14,7 @@ namespace KOControls.GUI.Tests.AutoSuggest
 	internal class AutoSuggestConsumerViewModel : AutoSuggestViewModel
 	{
 		public AutoSuggestConsumerViewModel()
-			: base(new AutoSuggestViewModel.DefaultSelector(new ValueConverter(x => x == null ? "" : ((City)x).Name),TestDataService.GetCities()), new ValueConverter(x => x == null ? "" : ((City)x).Name))
+			: base(new AutoSuggestViewModel.DefaultSelector(new ValueConverter(x => x == null ? "" : ((City)x).Name), TestDataService.AllCities), new ValueConverter(x => x == null ? "" : ((City)x).Name))
 		{
 
 		}
