@@ -1,21 +1,18 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
 using KOControls.Core;
 using KOControls.GUI.Core;
+using System.ComponentModel;
 
 namespace KOControls.GUI
 {
-	//TBD:
-	//5. Copy/Paste does not work.
+	using __type=AutoSuggestViewModel;
 	public class AutoSuggestViewModel : ViewModel
 	{
 		public AutoSuggestViewModel()
@@ -33,8 +30,10 @@ namespace KOControls.GUI
 			ApplyFilterCommand = new Command(ApplyFilter);
 			ConfirmCommand = new Command(Confirm);
 			RefreshCommand = new Command(Refresh);
-			CancelCommand = new Command(Cancel);
-			ClearCommand = new Command(Clear);
+			CancelCommand = new Command(x => Cancel());
+			ClearCommand = new Command(x => Clear());
+
+			Suggestions = new SelectedSuggestionsObservableCollection();
 		}
 
 		public AutoSuggestViewModel(ISelector selector, IValueConverter suggestionToStringConverter = null, IValueConverter suggestionPreviewToStringConverter = null, object styleModel = null)
@@ -47,16 +46,42 @@ namespace KOControls.GUI
 		}
 
 		#region Suggestion
-		public static readonly DependencyProperty SuggestionProperty = ViewModel.RegisterProperty<object, AutoSuggestViewModel>("Suggestion", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SuggestionProperty, v));
+		public static readonly DependencyProperty SuggestionProperty = ViewModel.RegisterProperty<object, AutoSuggestViewModel>("Suggestion", null, (d, v) => ((AutoSuggestViewModel)d).AddSuggestionToSuggestions(v.NewValue), (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SuggestionProperty, v));
 		public object Suggestion { get { return GetValue(SuggestionProperty); } set { SetValue(SuggestionProperty, value); } }
+		#endregion
+		#region Suggestions
+		public static readonly DependencyProperty SuggestionsProperty = ViewModel.RegisterProperty<SelectedSuggestionsObservableCollection, AutoSuggestViewModel>("Suggestions", null);
+		public SelectedSuggestionsObservableCollection Suggestions { get { return (SelectedSuggestionsObservableCollection)GetValue(SuggestionsProperty); } set { SetValue(SuggestionsProperty, value); } }
+		private void AddSuggestionToSuggestions(object suggestion)
+		{
+			if(suggestion != null)
+			{
+				Suggestions.Clear();
+				Suggestions.Add(suggestion);
+			}
+		}
+		#endregion
+
+		#region SuggestionPreview
+		public static readonly DependencyProperty SuggestionPreviewProperty = ViewModel.RegisterProperty<object, AutoSuggestViewModel>("SuggestionPreview", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SuggestionPreviewProperty, v));
+		public object SuggestionPreview { get { return GetValue(SuggestionPreviewProperty); } set { SetValue(SuggestionPreviewProperty, value); } }
+		#endregion
+		#region SuggestionPreviews
+		private static readonly DependencyPropertyKey SuggestionPreviewsPropertyKey = ViewModel.RegisterReadOnlyProperty<IEnumerable, AutoSuggestViewModel>("SuggestionPreviews", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SuggestionPreviewsProperty, v));
+		public static DependencyProperty SuggestionPreviewsProperty { get { return SuggestionPreviewsPropertyKey.DependencyProperty; } }
+		public IEnumerable SuggestionPreviews { get { return (IEnumerable)GetValue(SuggestionPreviewsPropertyKey); } protected set { SetValue(SuggestionPreviewsPropertyKey, value); } }
+		#endregion
+
+		#region Filter
+		public static readonly DependencyProperty SelectorProperty = ViewModel.RegisterProperty<ISelector, AutoSuggestViewModel>("Selector", null, (d, a) => ((__type)d).ApplyFilter(""), (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SelectorProperty, v));
+		public ISelector Selector { get { return (ISelector)GetValue(SelectorProperty); } set { SetValue(SelectorProperty, value); } }
 		#endregion
 
 		#region CancelCommand
 		private static readonly DependencyPropertyKey CancelCommandPropertyKey = ViewModel.RegisterReadOnlyProperty<Command, AutoSuggestViewModel>("CancelCommand");
 		public static DependencyProperty CancelCommandProperty { get { return CancelCommandPropertyKey.DependencyProperty; } }
 		public Command CancelCommand { get { return (Command)GetValue(CancelCommandPropertyKey); } private set { SetValue(CancelCommandPropertyKey, value); } }
-		public void Cancel() { Cancel(null); }
-		private void Cancel(object parameter)
+		public void Cancel()
 		{
 			DelayTimer.IsEnabled = false;
 
@@ -66,17 +91,13 @@ namespace KOControls.GUI
 		}
 
 		public event Action Cancelled = () => { };
-		protected virtual void OnCancelled()
-		{
-			Cancelled();
-		}
+		protected virtual void OnCancelled() { Cancelled(); }
 		#endregion
 		#region ClearCommand
 		private static readonly DependencyPropertyKey ClearCommandPropertyKey = ViewModel.RegisterReadOnlyProperty<Command, AutoSuggestViewModel>("ClearCommand");
 		public static DependencyProperty ClearCommandProperty { get { return ClearCommandPropertyKey.DependencyProperty; } }
 		public Command ClearCommand { get { return (Command)GetValue(ClearCommandPropertyKey); } private set { SetValue(ClearCommandPropertyKey, value); } }
-		public void Clear() { Clear(null); }
-		private void Clear(object parameter)
+		public void Clear()
 		{
 			DelayTimer.IsEnabled = false;
 
@@ -86,26 +107,11 @@ namespace KOControls.GUI
 		#endregion
 
 		#region IsConfirmed
-		private static readonly DependencyPropertyKey IsConfirmedPropertyKey = ViewModel.RegisterReadOnlyProperty<bool, AutoSuggestViewModel>("IsConfirmed");
+		private static readonly DependencyPropertyKey IsConfirmedPropertyKey = RegisterReadOnlyProperty<bool, AutoSuggestViewModel>("IsConfirmed");
 		public static DependencyProperty IsConfirmedProperty { get { return IsConfirmedPropertyKey.DependencyProperty; } }
 		public bool IsConfirmed { get { return (bool)GetValue(IsConfirmedPropertyKey); } private set { SetValue(IsConfirmedPropertyKey, value); } }
 		#endregion
 
-		#region Suggestions
-		private static readonly DependencyPropertyKey SuggestionsPropertyKey = ViewModel.RegisterReadOnlyProperty<IEnumerable, AutoSuggestViewModel>("Suggestions", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SuggestionsProperty, v));
-		public static DependencyProperty SuggestionsProperty { get { return SuggestionsPropertyKey.DependencyProperty; } }
-		public IEnumerable Suggestions { get { return (IEnumerable)GetValue(SuggestionsPropertyKey); } protected set { SetValue(SuggestionsPropertyKey, value); } }
-		#endregion
-
-		#region SuggestionPreview
-		public static readonly DependencyProperty SuggestionPreviewProperty = ViewModel.RegisterProperty<object, AutoSuggestViewModel>("SuggestionPreview", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SuggestionPreviewProperty, v));
-		public object SuggestionPreview { get { return GetValue(SuggestionPreviewProperty); } set { SetValue(SuggestionPreviewProperty, value); } }
-		#endregion
-
-		#region Filter
-		public static readonly DependencyProperty SelectorProperty = ViewModel.RegisterProperty<ISelector, AutoSuggestViewModel>("Selector", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(SelectorProperty, v));
-		public ISelector Selector { get { return (ISelector)GetValue(SelectorProperty); } set { SetValue(SelectorProperty, value); } }
-		#endregion
 
 		#region Delay
 		public static readonly DependencyProperty DelayProperty = ViewModel.RegisterProperty<TimeSpan, AutoSuggestViewModel>("Delay", new TimeSpan(0), DelayValueChanged, null);
@@ -115,17 +121,14 @@ namespace KOControls.GUI
 
 		private static void DelayValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
-			AutoSuggestViewModel asVM = d as AutoSuggestViewModel;
-			if (asVM != null)
-			{
-				TimeSpan ts = (TimeSpan)e.NewValue;
-				if (ts != null)
-				{
-					if (ts.TotalMilliseconds == 0)
-						asVM.DelayTimer.IsEnabled = false;
-					asVM.DelayTimer.Interval = ts;
-				}
-			}
+			var asVM = d as AutoSuggestViewModel;
+			if(asVM == null) return;
+
+			var ts = (TimeSpan)e.NewValue;
+
+			if(ts.TotalMilliseconds == 0)
+				asVM.DelayTimer.IsEnabled = false;
+			asVM.DelayTimer.Interval = ts;
 		}
 		#endregion
 
@@ -163,36 +166,35 @@ namespace KOControls.GUI
 		#endregion
 
 		#region EmptyValue
-		public static readonly DependencyProperty EmptyValueProperty = ViewModel.RegisterProperty<object, AutoSuggestViewModel>("EmptyValue", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(EmptyValueProperty, v));
+		public static readonly DependencyProperty EmptyValueProperty = RegisterProperty<object, AutoSuggestViewModel>("EmptyValue", null, null, (d, v) => ((AutoSuggestViewModel)d).OnPropertyChanging(EmptyValueProperty, v));
 		public object EmptyValue { get { return (object)GetValue(EmptyValueProperty); } set { SetValue(EmptyValueProperty, value); } }
 		#endregion
 
 		#region ApplyFilterCommand
 		//You may bind the command to a search button next to the textbox. This can be used in combination with the ApplyFilterTrigger Option.
-		private static readonly DependencyPropertyKey ApplyFilterCommandPropertyKey = ViewModel.RegisterReadOnlyProperty<Command, AutoSuggestViewModel>("ApplyFilterCommand");
+		private static readonly DependencyPropertyKey ApplyFilterCommandPropertyKey = RegisterReadOnlyProperty<Command, AutoSuggestViewModel>("ApplyFilterCommand");
 		public static DependencyProperty ApplyFilterCommandProperty { get { return ApplyFilterCommandPropertyKey.DependencyProperty; } }
 		public Command ApplyFilterCommand { get { return (Command)GetValue(ApplyFilterCommandPropertyKey); } private set { SetValue(ApplyFilterCommandPropertyKey, value); } }
-		private void ApplyFilter(object filterInput){ApplyFilter(filterInput as string);}
+		private void ApplyFilter(object filterInput) { ApplyFilter(filterInput as string); }
 		private void ApplyFilter()
 		{
-			Suggestions = Selector.Select(_applyingFilterInput);
-			FilterApplied();
-
-			if (!ValidateSuggestionAgainstCurrentSuggestions(SuggestionPreview))
-				SuggestionPreview = null;
+			SuggestionPreviews = Selector.Select(_applyingFilterInput);
+			//What to do with validating the SuggestionPreview. Should we possibly do it after Filter Applied?
+			//SuggestionPreview = null;
+			FilterApplied(_applyingFilterInput);
 		}
+		public event Action<string> FilterApplied = (y) => { };
 
 		public void ApplyFilter(string filterInput)
 		{
 			_applyingFilterInput = filterInput;
 
 			DelayTimer.IsEnabled = false;
-			if (Delay.TotalMilliseconds == 0)
+			if(Delay.TotalMilliseconds == 0)
 				ApplyFilter();
 			else
 				DelayTimer.IsEnabled = true;
 		}
-	
 		private string _applyingFilterInput;
 		#endregion
 		#region ConfirmCommand
@@ -204,16 +206,16 @@ namespace KOControls.GUI
 		{
 			DelayTimer.IsEnabled = false;
 
-			if (SuggestionPreview == null || SuggestionPreview.Equals(EmptyValue))
+			if(SuggestionPreview == null || SuggestionPreview.Equals(EmptyValue))
 			{
-				if (IsEmptyValueAllowed && (SuggestionPreview == EmptyValue || SuggestionPreview.Equals(EmptyValue)) && String.IsNullOrWhiteSpace(filterInput))
+				if(IsEmptyValueAllowed && Equals(SuggestionPreview, EmptyValue) && filterInput.IsNullOrWhiteSpace())
 				{
-					Suggestion = SuggestionPreview;
+					Suggestion = EmptyValue;
 				}
-				else if (IsFreeTextAllowed && FreeTextToSuggestionConverter != null && (Suggestions == null || Suggestions.Count() == 0 || (Suggestions.Count() > 0 && String.Compare(filterInput, SuggestionToString(Suggestion),  StringComparison.CurrentCultureIgnoreCase) != 0)))
+				else if(IsFreeTextAllowed && FreeTextToSuggestionConverter != null)
 				{
 					object suggestion;
-					if ( FreeTextToSuggestionConverter(filterInput, out suggestion))
+					if(FreeTextToSuggestionConverter(filterInput, out suggestion))
 						Suggestion = SuggestionPreview = suggestion;
 					else
 						Cancel();
@@ -225,8 +227,10 @@ namespace KOControls.GUI
 			}
 			else
 			{
-				if (ValidateSuggestion(SuggestionPreview))
-					Suggestion = SuggestionPreview;
+				if (IsConfirmed) return;
+
+				if(ValidateSuggestion(SuggestionPreview))
+					Suggestion = SuggestionPreview;					
 				else
 					Cancel();
 			}
@@ -234,15 +238,12 @@ namespace KOControls.GUI
 			OnConfirmed(filterInput);
 		}
 
-		public event Action<object> Confirmed = (object filterInput) => { };
-		protected virtual void OnConfirmed(object filterInput)
-		{
-			Confirmed(filterInput);
-		}
+		public event Action<object> Confirmed = filterInput => { };
+		protected virtual void OnConfirmed(object filterInput) { Confirmed(filterInput); }
 		#endregion
 
 		#region RefreshCommand - Manual notification for property changes in Suggestion or SuggestionPreview (must happen after suggestion edit).
-		private static readonly DependencyPropertyKey RefreshCommandPropertyKey = ViewModel.RegisterReadOnlyProperty<Command, AutoSuggestViewModel>("RefreshCommand");
+		private static readonly DependencyPropertyKey RefreshCommandPropertyKey = RegisterReadOnlyProperty<Command, AutoSuggestViewModel>("RefreshCommand");
 		public static DependencyProperty RefreshCommandProperty { get { return RefreshCommandPropertyKey.DependencyProperty; } }
 		public Command RefreshCommand { get { return (Command)GetValue(RefreshCommandPropertyKey); } private set { SetValue(RefreshCommandPropertyKey, value); } }
 		public void Refresh() { Refresh(null); }
@@ -250,62 +251,52 @@ namespace KOControls.GUI
 		{
 			DelayTimer.IsEnabled = false;
 
-			if (Refreshed != null) Refreshed();
+			if(Refreshed != null) Refreshed();
 		}
 		public event Action Refreshed;
 		#endregion
 
-		public event Action FilterApplied = () => { };
+		#region Separators
+		public static readonly DependencyProperty SeparatorsProperty = ViewModel.RegisterProperty<IList<string>, __type>("Separators");
+		public IList<string> Separators { get { return (IList<string>)GetValue(SeparatorsProperty); } set { SetValue(SeparatorsProperty, value); } }
+		#endregion
 
 		protected object OnPropertyChanging(DependencyProperty property, object value)
 		{
-			if (property == SuggestionProperty)
+			if(property == SuggestionProperty)
 			{
-				if (Equals(value, null) || string.Empty.Equals(value)) value = EmptyValue;
+				if(Equals(value, null) || string.Empty.Equals(value)) value = EmptyValue;
 
-				if (IsFreeTextAllowed)
+				if(IsFreeTextAllowed)
 				{
-					if (IsEmptyValueAllowed)
-					{ }
+					if(IsEmptyValueAllowed)
+					{
+					}
 					else
-						if (Equals(value, EmptyValue))
+					{
+						if(Equals(value, EmptyValue))
 							value = Suggestion;
+					}
 				}
 				else
 				{
-					if (IsEmptyValueAllowed)
+					if(IsEmptyValueAllowed)
 					{
-						if (!Equals(value, EmptyValue) && !ValidateSuggestion(value))
+						if(!Equals(value, EmptyValue) && !ValidateSuggestion(value))
 							value = Suggestion;
 					}
 					else
 					{
-						if (Equals(value, EmptyValue) || !ValidateSuggestion(value))
+						if(Equals(value, EmptyValue) || !ValidateSuggestion(value))
 							value = Suggestion;
 					}
 				}
 			}
-			else if (property == SuggestionPreviewProperty)
+			else if(property == SuggestionPreviewProperty)
 			{
-				if (Equals(value, null) || string.Empty.Equals(value)) value = EmptyValue;
+				if(Equals(value, null) || string.Empty.Equals(value)) value = EmptyValue;
 			}
 			return value;
-		}
-
-		protected bool ValidateSuggestionAgainstCurrentSuggestions(object suggestion)
-		{
-			if (Equals(suggestion, Suggestion)) return true;
-			if (IsEmptyValueAllowed && Equals(suggestion, EmptyValue)) return true;
-			if (Equals(suggestion, null)) return false;
-
-			if (Suggestions != null)
-			{
-				foreach (var next in Suggestions)
-					if (Equals(next, suggestion))
-						return true;
-			}
-
-			return false;
 		}
 
 		#region Commands - optional
@@ -313,6 +304,40 @@ namespace KOControls.GUI
 		public static DependencyProperty CommandsProperty { get { return CommandsPropertyKey.DependencyProperty; } }
 		public ObservableCollection<CommandBase> Commands { get { return (ObservableCollection<CommandBase>)GetValue(CommandsPropertyKey); } private set { SetValue(CommandsPropertyKey, value); } }
 		#endregion
+
+		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if(e.Property == SuggestionPreviewProperty || e.Property == SuggestionProperty)
+			{
+				if(e.Property == SuggestionProperty)
+					Cancel();
+
+				IsConfirmed = Equals(Suggestion, SuggestionPreview);
+			}
+
+			base.OnPropertyChanged(e);
+		}
+
+		protected bool ValidateSuggestionAgainstCurrentSuggestions(object suggestion, IEnumerable suggestions)
+		{
+			if (Equals(suggestion, Suggestion)) return true;
+			if (IsEmptyValueAllowed && Equals(suggestion, EmptyValue)) return true;
+			if (Equals(suggestion, null)) return false;
+
+			if (suggestions != null)
+				foreach (var next in suggestions)
+					if (Equals(next, suggestion))
+						return true;
+
+			return false;
+		}
+		private bool ValidateSuggestion(object suggestion)
+		{
+			if (ValidateSuggestionAgainstCurrentSuggestions(suggestion, SuggestionPreviews)) return true;
+
+			var suggestions = Selector.Select(SuggestionToString(suggestion));
+			return ValidateSuggestionAgainstCurrentSuggestions(suggestion, suggestions);
+		}
 
 		#region Nested classes
 		public class DefaultSuggestionToStringConverter : IValueConverter
@@ -324,65 +349,108 @@ namespace KOControls.GUI
 			public object Convert(object value, Type targetType, object parameter, CultureInfo culture) { return value + string.Empty; }
 			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { return value; }
 		}
+		public class PropertyPathSuggestionToStringConverter : DependencyObject, IValueConverter
+		{
+			public PropertyPathSuggestionToStringConverter(string propertyPath) { _propertyPath = propertyPath; }
+			private readonly string _propertyPath;
+
+			#region Value
+			public static readonly DependencyProperty ValueProperty = ViewModel.RegisterProperty<object, PropertyPathSuggestionToStringConverter>("Value");
+			public object Value { get { return (object)GetValue(ValueProperty); } set { SetValue(ValueProperty, value); } }
+			#endregion
+
+			public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				if(value == null) return null;
+				if(String.IsNullOrEmpty(_propertyPath)) return value.ToString();
+
+				BindingOperations.SetBinding(this, ValueProperty, new Binding(_propertyPath) { Source = value, Mode = BindingMode.OneWay });
+				var tmpValue = Value;
+				BindingOperations.ClearBinding(this, ValueProperty);
+
+				return tmpValue;
+			}
+			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+			{
+				BindingOperations.SetBinding(this, ValueProperty, new Binding(_propertyPath) { Source = value, Mode = BindingMode.OneWayToSource });
+				BindingOperations.ClearBinding(this, ValueProperty);
+
+				return Value;
+			}
+		}
 
 		public class DefaultSelector : ISelector
 		{
+			public DefaultSelector(Func<object, string, bool> suggestionFilter, IEnumerable suggestionsSource)
+			{
+				_suggestionFilter = suggestionFilter;
+				_suggestionsSource = suggestionsSource;
+				_suggestionType = ReflectionHelper.GetEnumerableGenericType(_suggestionsSource.GetType());
+			}
 			public DefaultSelector(IValueConverter suggestionToStringConverter, IEnumerable suggestionsSource)
 			{
-				_suggestionToStringConverter = suggestionToStringConverter;
+				_suggestionFilter = (potentialSuggestion, filterInput) => (suggestionToStringConverter.Convert(potentialSuggestion, typeof(string), null, CultureInfo.CurrentCulture) + "").StartsWith(filterInput, StringComparison.CurrentCultureIgnoreCase);
 				_suggestionsSource = suggestionsSource;
+				_suggestionType = ReflectionHelper.GetEnumerableGenericType(_suggestionsSource.GetType());
 			}
 
 			private readonly IEnumerable _suggestionsSource;
-			private readonly IValueConverter _suggestionToStringConverter;
-
-			private string SuggestionToString(object suggestion)
-			{
-				return _suggestionToStringConverter.Convert(suggestion, typeof(string), null, CultureInfo.CurrentCulture) + "";
-			}
+			private readonly Func<object, string, bool> _suggestionFilter;
+			private readonly Type _suggestionType;
 
 			public IEnumerable Select(object filterInput)
 			{
-				var filterInputAsString = filterInput as string ?? String.Empty;
-				Type t = ReflectionHelper.GetEnumerableGenericType(_suggestionsSource.GetType());
+				if(_suggestionsSource == null) return null;
 
-				IList l = ReflectionHelper.CreateListInstanceWithT(t);
+				var filterInputAsString = filterInput as string ?? String.Empty;
+
+				var l = ReflectionHelper.CreateListInstanceWithT(_suggestionType);
 				foreach (object suggestion in _suggestionsSource)
-					if(SuggestionToString(suggestion).StartsWith(filterInputAsString, StringComparison.CurrentCultureIgnoreCase))
+					 if(_suggestionFilter(suggestion, filterInputAsString))
 						l.Add(suggestion);
 				
 				return l;
 			}
 		}
+
+		public class NoFilterDefaultSelector : ISelector
+		{
+			private readonly IEnumerable _suggestionsSource;
+			public NoFilterDefaultSelector(IEnumerable suggestionsSource)
+			{
+				_suggestionsSource = suggestionsSource;
+			}
+			public IEnumerable Select(object filterInput) { return _suggestionsSource; }
+		}
+
+		public class SelectedSuggestionsObservableCollection : ObservableCollection<object>
+		{
+			#region RuntimeVersion
+			public int RuntimeVersion
+			{
+				get { return _runtimeVersion; }
+				private set
+				{
+					if(_runtimeVersion != value)
+					{
+						_runtimeVersion = value;
+						OnPropertyChanged(new PropertyChangedEventArgs("RuntimeVersion"));
+					}
+				}
+			}
+			private int _runtimeVersion;
+			#endregion
+
+			protected override void OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+			{
+				base.OnCollectionChanged(e);
+
+				if(RuntimeVersion >= (Int32.MaxValue - 1))
+					RuntimeVersion = 0;
+				else
+					++RuntimeVersion;
+			}
+		}
 		#endregion
-
-		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
-		{
-			if (e.Property == SuggestionPreviewProperty || e.Property == SuggestionProperty)
-			{
-				if (e.Property == SuggestionProperty)
-					Cancel();
-
-				IsConfirmed = Equals(Suggestion, SuggestionPreview);
-			}
-
-			base.OnPropertyChanged(e);
-		}
-		private bool ValidateSuggestion(object suggestion)
-		{
-			if (!ValidateSuggestionAgainstCurrentSuggestions(suggestion))
-			{
-				var suggestions = Selector.Select(SuggestionToString(suggestion));
-				if (suggestions != null)
-					foreach (var next in suggestions)
-						if (Equals(next, suggestion))
-							return true;
-			}
-			else
-			{
-				return true;
-			}
-			return false;
-		}
 	}
 }

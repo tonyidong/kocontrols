@@ -8,10 +8,14 @@
 	
 	<!--AutoSuggestControl_Default_SuggestionsTemplate-->
 	<ControlTemplate x:Key="AutoSuggestControl_Default_SuggestionsTemplate">
-		<DataGrid x:Name="PART_Selector" SelectionMode="Single" AutoGenerateColumns="True" IsReadOnly="True" HeadersVisibility="None" EnableRowVirtualization="True"
-				  ItemsSource="{Binding Suggestions}"
-				  MinWidth="{Binding TargetTextBox.ActualWidth, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestControl}}"
-				  />
+		<DataGrid
+			x:Name="PART_Selector"
+			SelectionMode="Single" IsReadOnly="True" HeadersVisibility="None" EnableRowVirtualization="True" GridLinesVisibility="None"
+			ItemsSource="{Binding SuggestionPreviews}"
+			AutoGenerateColumns="{Binding AutoGenerateColumns, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestControl}}"
+			DisplayMemberPath="{Binding DisplayMemberPath, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestControl}}"
+			MinWidth="{Binding TextTokensControlTarget.ActualWidth, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestControl}}"
+			/>
 	</ControlTemplate>
 
 	<!--AutoSuggestControl_Default_CommandsTemplate-->
@@ -48,20 +52,23 @@
 					<RowDefinition Height="Auto"></RowDefinition>
 				</Grid.RowDefinitions>
 
-				<Label x:Name="PART_SearchCriteria" Height="0" Grid.Row="0"/>
+				<Label
+					x:Name="PART_SearchCriteria" Height="0" Grid.Row="0"/>
 		
-				<Control x:Name="_suggestionsContentPresenter" Grid.Row="1"
-						 Template="{TemplateBinding SuggestionsTemplate}"
-						 DataContext="{Binding Suggestions}"/>
+				<Control
+					x:Name="_suggestionsContentPresenter" Grid.Row="1"
+					Template="{Binding SuggestionsTemplate, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+					MinWidth="{Binding TextTokensControlTarget.ActualWidth, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+					DataContext="{Binding SuggestionPreviews}"/>
 
-				<Control x:Name="_commandsContentPresenter" Grid.Row="2"
-						 Template="{TemplateBinding CommandsTemplate}"
-						 DataContext="{Binding Commands}"/>
+				<Control
+					x:Name="_commandsContentPresenter" Grid.Row="2"
+					Template="{TemplateBinding CommandsTemplate}"
+					DataContext="{Binding Commands}"/>
 			</Grid>
 		</Border>
 	</ControlTemplate>
 	
 	<Style x:Key="AutoSuggestControl_Default_Style" TargetType="GUI:AutoSuggestControl">
-		<Setter Property="SuggestionsTemplate" Value="{StaticResource AutoSuggestControl_Default_SuggestionsTemplate}"></Setter>
 	</Style>
 </ResourceDictionary>

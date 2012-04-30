@@ -5,9 +5,9 @@ using KOControls.Core;
 
 namespace ControlTestApp
 {
-	public partial class AutoSuggestTextBoxTestDataGrid : UserControl
+	public partial class AutoSuggestComboBoxTestDataGrid : UserControl
 	{
-		public AutoSuggestTextBoxTestDataGrid()
+		public AutoSuggestComboBoxTestDataGrid()
 		{
 			InitializeComponent();
 		}

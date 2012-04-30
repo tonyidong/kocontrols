@@ -86,7 +86,7 @@ namespace KOControls.GUI.Core
 			if(prnt2 is T) return (T)(object)prnt2;
 			if(prnt2 != null) return GetVisualParent<T>(prnt2);
 
-			return null;
+			return default(T);
 		}
 
 		public static bool VisualChildOf(this DependencyObject elem, DependencyObject parent)
@@ -297,6 +297,11 @@ namespace KOControls.GUI.Core
 			}
 
 			return foundChild;
+		}
+
+		public static Window GetWindow(this DependencyObject elem)
+		{
+			return Window.GetWindow(elem) ?? GetVisualParent<Window>(elem) ?? Application.Current.MainWindow;
 		}
 	}
 }

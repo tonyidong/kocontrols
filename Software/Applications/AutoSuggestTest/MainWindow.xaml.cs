@@ -11,8 +11,10 @@ namespace ControlTestApp
 
 			var vm = new TestAppViewModel();
 			vm.AutoSuggestConsumerViewModel = new AutoSuggestConsumerViewModel();
-	
-			vm.CitiesViewModel = new CitiesViewModel();
+			vm.AutoSuggestConsumerViewModelComboBox = new AutoSuggestConsumerViewModelComboBox();
+			vm.AutoSuggestConsumerViewModelComboBoxMS = new AutoSuggestConsumerViewModelComboBox();
+			vm.AutoSuggestConsumerViewModelDataGrid = new AutoSuggestConsumerViewModelDataGrid();
+			vm.AutoSuggestConsumerViewModelCounties = new AutoSuggestConsumerViewModelCounties();
 
 			DataContext = vm;
 		}

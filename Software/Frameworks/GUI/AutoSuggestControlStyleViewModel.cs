@@ -1,5 +1,4 @@
-﻿using System;
-using KOControls.Core;
+﻿using KOControls.Core;
 using System.Windows;
 
 namespace KOControls.GUI
@@ -14,8 +13,8 @@ namespace KOControls.GUI
 		}
 		public AutoSuggestControlStyleViewModel(TaboutTriggers taboutTrigger, ConfirmTriggers confirmTrigger)
 		{
-			this.TaboutTrigger = taboutTrigger;
-			this.ConfirmTrigger = confirmTrigger;
+			TaboutTrigger = taboutTrigger;
+			ConfirmTrigger = confirmTrigger;
 		}
 		#endregion 
 

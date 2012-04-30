@@ -5,5 +5,6 @@ namespace ControlTestApp
 {
 	public partial class App : Application
 	{
+
 	}
 }
