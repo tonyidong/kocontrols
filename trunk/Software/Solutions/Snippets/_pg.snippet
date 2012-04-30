@@ -31,7 +31,7 @@
 				<![CDATA[#region $Name$
 private static readonly DependencyPropertyKey $Name$PropertyKey = ViewModel.RegisterReadOnlyProperty<$Type$, $Owner$>("$Name$");
 public static DependencyProperty $Name$Property { get { return $Name$PropertyKey.DependencyProperty; } }
-public $Type$ $Name$ { get { return ($Type$)GetValue($Name$PropertyKey); } private set { SetValue($Name$PropertyKey, value); } }
+public $Type$ $Name$ { get { return ($Type$)GetValue($Name$Property); } private set { SetValue($Name$PropertyKey, value); } }
 #endregion]]>
 			</Code>
 		</Snippet>

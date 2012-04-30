@@ -2,7 +2,9 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 using KOControls.Core;
+using KOControls.GUI.Core;
 
 namespace KOControls.GUI
 {
@@ -31,30 +33,35 @@ namespace KOControls.GUI
 
 		private void WindowDetachEvents()
 		{
-			if(_window != null)
+			if (Window != null)
 			{
-				_window.PreviewKeyDown -= Window_PreviewKeyDown;
-				_window.Deactivated -= Window_Deactivated;
-				_window.LocationChanged -= Window_LocationChanged;
+				Window.PreviewKeyDown -= Window_PreviewKeyDown;
+				Window.PreviewMouseDown -= Window_PreviewMouseDown;
+				Window.Deactivated -= Window_Deactivated;
+				Window.LocationChanged -= Window_LocationChanged;
 			}
 		}
 		private void WindowAttachEvents()
 		{
-			WindowDetachEvents();
-		
-			_window = Window.GetWindow(this);
-			if(_window != null)
+			if (Window != null)
 			{
-				_window.PreviewKeyDown += Window_PreviewKeyDown;
-				_window.Deactivated += Window_Deactivated;
-				_window.LocationChanged += Window_LocationChanged;
+				WindowDetachEvents();
+
+				Window.PreviewKeyDown += Window_PreviewKeyDown;
+				Window.PreviewMouseDown -= Window_PreviewMouseDown;
+				Window.Deactivated += Window_Deactivated;
+				Window.LocationChanged += Window_LocationChanged;
 			}
 		}
 
 		private void Window_LocationChanged(object sender, EventArgs e)
 		{
-			HorizontalOffset += 0.01;
-			HorizontalOffset -= 0.01;
+			IsOpen = false;
+		}
+		private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			if(!((DependencyObject)e.OriginalSource).VisualChildOf(this))
+				IsOpen = false;
 		}
 
 		private void Window_Deactivated(object sender, EventArgs e)
@@ -63,7 +70,7 @@ namespace KOControls.GUI
 		}
 		private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
 		{
-			if(_window != null) _window.Activate();
+			Window.Activate();
 
 			if(e.Handled) return;
 
@@ -90,7 +97,7 @@ namespace KOControls.GUI
 				_cancelWindowKeyDown = true;
 			}
 		}
-		private Window _window;
+		public Window Window { get { return _window ?? (_window = this.GetWindow()); } } private Window _window;
 		private bool _cancelWindowKeyDown;
 	}
 }

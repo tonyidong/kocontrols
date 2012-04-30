@@ -23,9 +23,20 @@ namespace KOControls.GUI.Core
 		{
 			var visible = Visibility.Visible;
 			if(value is Visibility) visible = (Visibility)value;
-			else if(value is string) Visibility.TryParse((string)value, out visible);
+			else if(value is string) VisibilityTryParse((string)value, out visible);
 
 			return visible == Visibility.Visible;
+		}
+
+		private bool VisibilityTryParse(string value, out Visibility result)
+		{
+			switch (value.ToUpper())
+			{
+				case "VISIBLE": result = Visibility.Visible; return true;
+				case "HIDDEN": result = Visibility.Hidden; return true;
+				case "COLLAPSED": result = Visibility.Collapsed; return true;
+				default: result = Visibility.Visible; return false;
+			}
 		}
 	}
 }

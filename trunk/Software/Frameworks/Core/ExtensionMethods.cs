@@ -20,7 +20,7 @@ namespace KOControls.Core
 
 		public static void SetBinding(this DependencyObject target, DependencyProperty targetProperty, DependencyObject source, DependencyProperty sourceProperty = null, BindingMode mode = BindingMode.TwoWay)
 		{
-			BindingOperations.SetBinding(target, targetProperty, new Binding() { Path=new PropertyPath(sourceProperty?? targetProperty), Source = source, Mode = mode });
+			BindingOperations.SetBinding(target, targetProperty, new Binding() { Path=new PropertyPath(sourceProperty ?? targetProperty), Source = source, Mode = mode });
 		}
 
 		public static void AddValueChanged(this DependencyObject target, DependencyProperty property, EventHandler handler)
@@ -46,5 +46,10 @@ namespace KOControls.Core
 
 		public static object FirstOrNull(this IEnumerable target) { return target == null ? null : target.Cast<object>().FirstOrDefault(); }
 		public static int Count(this IEnumerable target) { return target == null ? 0 : Enumerable.Count(target.Cast<object>()); }
+
+		public static bool IsNullOrWhiteSpace(this string str)
+		{
+			return String.IsNullOrEmpty(str) || String.IsNullOrEmpty(str.Trim());
+		}
 	}
 }

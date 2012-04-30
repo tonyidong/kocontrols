@@ -53,6 +53,7 @@
       <DependentUpon>CityEditWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\CityCountry.cs" />
+    <Compile Include="Model\County.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
