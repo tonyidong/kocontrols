@@ -28,6 +28,7 @@
 		</Label>
 		
 		<DataGrid AutoGenerateColumns="False" Height="242" HorizontalAlignment="Left" Name="dataGrid1" VerticalAlignment="Top" Width="503"
+                  EnableRowVirtualization="True"
 				  ItemsSource="{Binding CityCountries}"
 				  SelectedItem="{Binding SelectedCityCountry, Mode=OneWayToSource, Converter={x:Static Core:IgnoreNewItemPlaceHolderConverter.Instance}}"
 				  Grid.Row="1" Grid.Column="0"

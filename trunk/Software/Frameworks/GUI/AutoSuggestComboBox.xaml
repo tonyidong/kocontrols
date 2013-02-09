@@ -60,10 +60,12 @@
 			<ControlTemplate>
 				<ListBox
 					x:Name="PART_Selector"
+                    
 					SelectionMode="Single"
 					ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestComboBox}}"
 					MinWidth="{Binding TextTokensControlTarget.ActualWidth, RelativeSource={RelativeSource AncestorType=GUI:AutoSuggestControl}}"
 					DisplayMemberPath="{Binding DisplayMemberPath, RelativeSource={RelativeSource FindAncestor,AncestorType=GUI:AutoSuggestComboBox}, Mode=OneWay}"
+                    VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling"
 					>
 					<ListBox.Resources>
 						<SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>

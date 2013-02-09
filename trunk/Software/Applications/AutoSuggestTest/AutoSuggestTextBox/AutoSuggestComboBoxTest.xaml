@@ -48,6 +48,7 @@
 							<ControlTemplate>
 								<DataGrid
 									x:Name="PART_Selector"
+                                    EnableRowVirtualization="True"
 									CanUserReorderColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeColumns="True" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="None" SelectionMode="Single"
 									GridLinesVisibility="None">
 									<DataGrid.Columns>
