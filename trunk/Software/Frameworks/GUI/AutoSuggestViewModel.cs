@@ -368,7 +368,7 @@ namespace KOControls.GUI
 				var tmpValue = Value;
 				BindingOperations.ClearBinding(this, ValueProperty);
 
-				return tmpValue;
+				return tmpValue.ToString();
 			}
 			public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 			{
